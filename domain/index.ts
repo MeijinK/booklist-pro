@@ -21,6 +21,7 @@ export {
   type AuthError,
   type ConflictError,
   type NetworkError,
+  type NotFoundError,
   type ValidationError,
 } from "./erreurs";
 
