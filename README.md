@@ -7,7 +7,12 @@ Carnet de lecture pour libraires — application [Expo](https://docs.expo.dev/ve
 
 ## Démarrer (< 5 min)
 
+Prérequis : **Node 24** (`.nvmrc`, `nvm use`) et npm 11. La CI utilise la même version ;
+installer avec une autre majeure de npm régénère `package-lock.json` différemment et
+casse `npm ci` en intégration continue.
+
 ```bash
+nvm use            # lit .nvmrc
 npm install
 npm run web        # ouvre l'app sur http://localhost:8081
 ```
