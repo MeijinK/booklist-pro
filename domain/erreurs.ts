@@ -67,10 +67,25 @@ export type AuthError = {
 };
 
 /**
+ * 404 : la ressource n'existe pas. Distinct d'une panne, parce que l'interface
+ * doit en faire un etat vide contextualise et non un ecran d'erreur, et parce
+ * qu'il ne sert a rien de reessayer.
+ */
+export type NotFoundError = {
+  kind: "notFound";
+  message: string;
+};
+
+/**
  * Union discriminee sur `kind`. Le sujet exige que 422 et 503 ne soient pas
  * traites de la meme facon : c'est ce discriminant qui l'impose au compilateur.
  */
-export type ApiErrorDetail = NetworkError | ValidationError | ConflictError | AuthError;
+export type ApiErrorDetail =
+  | NetworkError
+  | ValidationError
+  | ConflictError
+  | AuthError
+  | NotFoundError;
 
 /**
  * Erreur applicative levee par la couche services.
