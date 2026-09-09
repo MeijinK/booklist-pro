@@ -7,9 +7,11 @@ Carnet de lecture pour libraires — application [Expo](https://docs.expo.dev/ve
 
 ## Démarrer (< 5 min)
 
-Prérequis : **Node 24** (`.nvmrc`, `nvm use`) et npm 11. La CI utilise la même version ;
-installer avec une autre majeure de npm régénère `package-lock.json` différemment et
-casse `npm ci` en intégration continue.
+Prérequis : **Node 24**, épinglé dans `.nvmrc` et lu par la CI — `nvm use` suffit.
+
+Après tout ajout ou retrait de dépendance, committer `package.json` **et**
+`package-lock.json` ensemble : un manifeste modifié sans lock régénéré fait échouer
+`npm ci` en intégration continue.
 
 ```bash
 nvm use            # lit .nvmrc
