@@ -1,50 +1,67 @@
-# Welcome to your Expo app 👋
+# BookList Pro
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+[![CI](https://github.com/MeijinK/booklist-pro/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MeijinK/booklist-pro/actions/workflows/ci.yml)
 
-## Get started
+Carnet de lecture pour libraires — application [Expo](https://docs.expo.dev/versions/v54.0.0/) / React Native.
+**Cible n°1 : le navigateur** (aucun émulateur requis) ; iOS et Android tournent sur la même base.
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Démarrer (< 5 min)
 
 ```bash
-npm run reset-project
+npm install
+npm run web        # ouvre l'app sur http://localhost:8081
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+L'API de démonstration vit dans `api-books-v2/` (fournie, non modifiable) :
 
-## Learn more
+```bash
+cd api-books-v2 && npm install
+npm start          # lots 1-3, sans auth
+npm run auth       # lot 4 : rôles et jetons
+npm run chaos      # 1,5 s de latence + 30 % d'échecs
+npm run final      # conditions de recette
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## Scripts
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+| Commande | Rôle |
+| --- | --- |
+| `npm run web` | Lance l'app dans le navigateur (cible principale) |
+| `npm run lint` | ESLint (config Expo) |
+| `npm run typecheck` | `tsc --noEmit`, TypeScript `strict` |
+| `npm test` | Tests unitaires et composants (Jest + Testing Library) |
+| `npm run test:coverage` | Idem avec rapport de couverture |
+| `npm run build:web` | Export web statique dans `dist/` |
+| `npm run test:e2e` | Tests de bout en bout Playwright sur l'export web |
 
-## Join the community
+Avant le premier `npm run test:e2e` :
 
-Join our community of developers creating universal apps.
+```bash
+npm run build:web
+npx playwright install chromium
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Playwright sert `dist/` sur le port 8081 tout seul (`webServer` dans `playwright.config.ts`).
+
+## Tests
+
+- **Unitaires / composants** — `components/__tests__/`, `hooks/__tests__/`, preset `jest-expo`, requêtes par rôle et par texte (jamais par structure DOM).
+- **Bout en bout** — `e2e/`, un parcours critique dans un vrai navigateur sur le bundle réellement livré.
+
+## Intégration continue
+
+`.github/workflows/ci.yml` s'exécute sur chaque pull request vers `main` et sur `main`, en quatre jobs parallèles :
+
+| Job | Commande |
+| --- | --- |
+| Lint | `npm run lint` |
+| Typecheck | `npm run typecheck` |
+| Tests unitaires | `npm run test:coverage` |
+| Tests e2e | `npm run build:web` puis `npm run test:e2e` |
+
+Les rapports de couverture et Playwright sont publiés en artefacts du run (7 jours).
+
+## Documentation
+
+- `AGENTS.md` — règles d'architecture et contrat de qualité
+- `docs/ADR/`, `docs/ARCHITECTURE.md`, `docs/PERFORMANCE.md`, `IA.md`
