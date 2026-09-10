@@ -45,10 +45,13 @@ function stubFetch(response: Response): void {
   global.fetch = jest.fn().mockResolvedValue(response) as unknown as typeof fetch;
 }
 
-let client: ReturnType<typeof createQueryClient> | undefined;
+let clientCourant: ReturnType<typeof createQueryClient> | undefined;
 
 function createWrapper() {
-  client = createQueryClient();
+  // Constante locale : le wrapper ferme dessus et ne voit jamais `undefined`.
+  // La variable de module ne sert qu'au nettoyage entre deux tests.
+  const client = createQueryClient();
+  clientCourant = client;
 
   return function Wrapper({ children }: { children: ReactNode }) {
     return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
@@ -61,8 +64,8 @@ afterEach(() => {
   global.fetch = vraiFetch;
   // Sans cela, le ramasse-miettes du cache laisse tourner un minuteur de cinq
   // minutes apres chaque test et le processus jest ne se termine pas seul.
-  client?.clear();
-  client = undefined;
+  clientCourant?.clear();
+  clientCourant = undefined;
 });
 
 describe("useBooks", () => {
