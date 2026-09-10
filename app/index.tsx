@@ -1,11 +1,9 @@
-import { Stack, useRouter } from "expo-router";
-import { useCallback } from "react";
-
-import { View } from "react-native";
-import { Button } from "react-native-paper";
-
 import { ThemeMenu } from "@/components/ui/ThemeMenu";
 import { BookList } from "@/features/books/BookList";
+import { Stack, useRouter } from "expo-router";
+import { useCallback } from "react";
+import { View } from "react-native";
+import { Button } from "react-native-paper";
 
 /**
  * Collection screen. It only wires up navigation: the list, its states and its
