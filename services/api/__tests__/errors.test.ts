@@ -1,5 +1,5 @@
 import type { Book } from "@/domain";
-import { toApiError } from "@/services/api/erreurs";
+import { toApiError } from "@/services/api/errors";
 
 const livre: Book = {
   id: "abc",
@@ -45,7 +45,7 @@ describe("toApiError", () => {
     expect(erreur.detail).toEqual({
       kind: "validation",
       message: "Saisie refusee.",
-      champs: { titre: "titre obligatoire" },
+      fields: { titre: "titre obligatoire" },
     });
   });
 
@@ -53,7 +53,7 @@ describe("toApiError", () => {
     const erreur = await toApiError(response(422, { erreur: "validation" }));
 
     expect(erreur.detail.kind).toBe("validation");
-    expect(erreur.detail).toMatchObject({ champs: {} });
+    expect(erreur.detail).toMatchObject({ fields: {} });
   });
 
   it("traduit un 409 en conflit porteur de la fiche serveur", async () => {
@@ -69,8 +69,8 @@ describe("toApiError", () => {
     expect(erreur.detail).toEqual({
       kind: "conflict",
       message: "Ce livre a ete modifie entre temps.",
-      serveur: livre,
-      versionAttendue: 7,
+      server: livre,
+      expectedVersion: 7,
     });
   });
 

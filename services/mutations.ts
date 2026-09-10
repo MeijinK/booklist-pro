@@ -73,6 +73,16 @@ export function cancel(key: string): boolean {
   return true;
 }
 
+/** Sends immediately, without waiting for the end of the delay. */
+export function flush(key: string): Promise<void> {
+  return execute(key);
+}
+
 export function isPending(key: string): boolean {
   return pending.has(key);
+}
+
+/** Keys still awaiting departure; lets a test clean up after itself. */
+export function pendingKeys(): string[] {
+  return [...pending.keys()];
 }
