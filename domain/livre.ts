@@ -40,21 +40,49 @@ export type Book = z.infer<typeof BookSchema>;
  * lot 1 : titre, auteur, editeur, annee de publication, statut de lecture.
  * C'est ce que PUT /books/:id exige au complet.
  */
+const AnneeSchema = z
+  .number()
+  .int("L'annee doit etre un nombre entier.")
+  .min(MIN_PUBLICATION_YEAR, `L'annee doit etre posterieure a ${MIN_PUBLICATION_YEAR}.`)
+  // Verifie a chaque validation plutot qu'au chargement du module, pour rester
+  // juste si l'application reste ouverte au passage d'une annee.
+  .refine(
+    (annee) => annee <= maxPublicationYear(),
+    "L'annee ne peut pas depasser l'annee prochaine.",
+  );
+
 export const BookDraftSchema = z.object({
   titre: z.string().trim().min(1, "Le titre est obligatoire."),
   auteur: z.string().trim().min(1, "L'auteur est obligatoire."),
   editeur: z.string().trim().min(1, "L'editeur est obligatoire."),
-  annee: z
-    .number()
-    .int("L'annee doit etre un nombre entier.")
-    .min(MIN_PUBLICATION_YEAR, `L'annee doit etre posterieure a ${MIN_PUBLICATION_YEAR}.`)
-    // Verifie a chaque validation plutot qu'au chargement du module, pour rester
-    // juste si l'application reste ouverte au passage d'une annee.
-    .refine(
-      (annee) => annee <= maxPublicationYear(),
-      "L'annee ne peut pas depasser l'annee prochaine.",
-    ),
+  annee: AnneeSchema,
   lu: z.boolean(),
 });
 
 export type BookDraft = z.infer<typeof BookDraftSchema>;
+
+/**
+ * Ce que le formulaire manipule.
+ *
+ * L'annee y transite en texte, parce qu'un champ de saisie ne rend jamais autre
+ * chose. La conversion est une regle metier a part entiere : « 19x4 » et une
+ * annee vide ne se signalent pas de la meme facon, et laisser un `Number()` nu
+ * dans un composant produirait un « NaN » a l'ecran. Le schema convertit puis
+ * applique exactement les memes bornes que BookDraftSchema.
+ */
+export const SaisieLivreSchema = z.object({
+  titre: z.string().trim().min(1, "Le titre est obligatoire."),
+  auteur: z.string().trim().min(1, "L'auteur est obligatoire."),
+  editeur: z.string().trim().min(1, "L'editeur est obligatoire."),
+  annee: z
+    .string()
+    .trim()
+    .min(1, "L'annee de publication est obligatoire.")
+    .refine((valeur) => /^\d{1,4}$/.test(valeur), "L'annee doit etre un nombre entier.")
+    .transform(Number)
+    .pipe(AnneeSchema),
+  lu: z.boolean(),
+});
+
+/** Valeurs telles que le formulaire les porte, avant conversion. */
+export type SaisieLivre = z.input<typeof SaisieLivreSchema>;
