@@ -74,15 +74,6 @@ export function cancel(key: string): boolean {
   return true;
 }
 
-/** Envoie sans attendre la fin du delai. */
-export function flush(key: string): Promise<void> {
-  return execute(key);
-}
-
 export function isPending(key: string): boolean {
   return pending.has(key);
-}
-
-export function pendingKeys(): string[] {
-  return [...pending.keys()];
 }
