@@ -81,35 +81,12 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  block: { gap: space.xl, padding: space.lg },
-  header: { flexDirection: "row", gap: space.lg },
-  identity: { flexShrink: 1, gap: space.xs, justifyContent: "flex-start" },
-  badges: { flexDirection: "row", flexWrap: "wrap", gap: space.sm, marginTop: space.sm },
-  fields: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  row: { gap: space.xxs, padding: space.md },
-  label: { color: colors.textMuted },
-});
-/** Falls back to the raw value: an unreadable date beats an "Invalid Date". */
-function readableDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-
-  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-}
-
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     block: { gap: space.xl, padding: space.lg },
     header: { flexDirection: "row", gap: space.lg },
     identity: { flexShrink: 1, gap: space.xs, justifyContent: "flex-start" },
-    badges: { flexDirection: "row", gap: space.sm, marginTop: space.sm },
+    badges: { flexDirection: "row", flexWrap: "wrap", gap: space.sm, marginTop: space.sm },
     fields: {
       backgroundColor: colors.surface,
       borderColor: colors.border,

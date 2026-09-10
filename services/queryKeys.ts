@@ -36,10 +36,6 @@ export const bookKeys = {
 };
 
 /**
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> da0d07c (fix conflict and rebase properly for front to work)
  * Notes live under their book, and not in a root `['notes', id]`.
  *
  * The hierarchy is what makes `bookKeys.all` expire a record together with its
@@ -50,9 +46,8 @@ export const noteKeys = {
   all: (bookId: string) => [...bookKeys.detail(bookId), "notes"] as const,
 };
 
-
 export const enrichmentKeys = {
   all: ["enrichment"] as const,
   byTitle: (title: string) =>
     [...enrichmentKeys.all, title.trim().toLocaleLowerCase("fr-FR")] as const,
-}
+};
