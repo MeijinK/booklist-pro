@@ -1,5 +1,10 @@
+export { CreationLivre } from "./CreationLivre";
+export { EditionLivre } from "./EditionLivre";
+export { FicheLivre } from "./FicheLivre";
+export { ListeDuFonds } from "./ListeDuFonds";
 export { useBook } from "./useBook";
 export { useBooks } from "./useBooks";
 export { useCreateBook } from "./useCreateBook";
-export { useDeleteBook } from "./useDeleteBook";
+export { useDeleteBook, type OptionsSuppression } from "./useDeleteBook";
+export { useFormulaireLivre, type FormulaireLivre } from "./useFormulaireLivre";
 export { useUpdateBook, type UpdateBookInput } from "./useUpdateBook";
