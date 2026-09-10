@@ -145,13 +145,6 @@ const makeStyles = (colors: Palette) =>
     block: { backgroundColor: colors.background, flex: 1 },
   // On the web, ProgressBar takes the full height of its parent: it needs a box
   // with a fixed height, otherwise it pushes the list off the screen.
-<<<<<<< HEAD
-<<<<<<< HEAD
-  progress: { height: 4 },
-});
-=======
-=======
->>>>>>> 960a7d9 (feat(books): server-side search, filters and sort in a toolbar)
     progress: {
       height: 4,
       left: 0,
@@ -162,11 +155,3 @@ const makeStyles = (colors: Palette) =>
       zIndex: 1,
     },
   });
-<<<<<<< HEAD
->>>>>>> bf2baab (refactor: lire les couleurs depuis le theme courant)
-=======
-=======
-  progress: { height: 4 },
-});
->>>>>>> 17e2aac (feat(books): server-side search, filters and sort in a toolbar)
->>>>>>> 960a7d9 (feat(books): server-side search, filters and sort in a toolbar)
