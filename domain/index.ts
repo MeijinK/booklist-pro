@@ -11,6 +11,17 @@ export {
 
 export { NOTE_MAX_LENGTH, NoteSchema, type Note } from "./note";
 
+export {
+  DEFAULT_LOCALE,
+  DEFAULT_THEME_PREFERENCE,
+  LOCALES,
+  parseLocale,
+  parseThemePreference,
+  THEME_PREFERENCES,
+  type Locale,
+  type ThemePreference,
+} from "./preferences";
+
 export { DEFAULT_LIMIT, MAX_LIMIT, pageSchema, type Page } from "./page";
 
 export {
