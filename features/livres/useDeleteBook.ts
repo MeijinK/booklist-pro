@@ -18,11 +18,21 @@ type ListSnapshot = [QueryKey, ListData | undefined][];
  *
  * L'etat d'avant est conserve : une annulation le restitue immediatement, et un
  * echec de l'appel le restitue aussi — aucune fiche ne disparait en silence.
+ *
+ * `enAttente` rend le sursis observable par l'interface : c'est lui qui decide
+ * l'affichage de la barre d'annulation, et sa disparition qui signale que
+ * l'ouvrage est parti pour de bon.
  */
-export function useDeleteBook() {
+export type OptionsSuppression = {
+  /** Appele quand la suppression est effectivement partie et acceptee. */
+  onConfirme?: (id: string) => void;
+};
+
+export function useDeleteBook({ onConfirme }: OptionsSuppression = {}) {
   const queryClient = useQueryClient();
   const snapshots = useRef(new Map<string, ListSnapshot>());
   const [error, setError] = useState<unknown>(undefined);
+  const [enAttente, setEnAttente] = useState<string | undefined>(undefined);
 
   const restore = useCallback(
     (id: string) => {
@@ -38,6 +48,7 @@ export function useDeleteBook() {
   const scheduleDelete = useCallback(
     (id: string) => {
       setError(undefined);
+      setEnAttente(id);
       snapshots.current.set(id, queryClient.getQueriesData<ListData>({ queryKey: bookKeys.lists() }));
 
       // Retrait optimiste : l'ouvrage quitte l'ecran avant tout aller-retour.
@@ -57,6 +68,8 @@ export function useDeleteBook() {
         key: id,
         run: () => deleteBook(id),
         onSettled: (cause) => {
+          setEnAttente((courant) => (courant === id ? undefined : courant));
+
           if (cause !== undefined) {
             restore(id);
             setError(cause);
@@ -66,15 +79,17 @@ export function useDeleteBook() {
           snapshots.current.delete(id);
           queryClient.removeQueries({ queryKey: bookKeys.detail(id) });
           void queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
+          onConfirme?.(id);
         },
       });
     },
-    [queryClient, restore],
+    [onConfirme, queryClient, restore],
   );
 
   const cancelDelete = useCallback(
     (id: string) => {
       if (!cancel(id)) return false;
+      setEnAttente((courant) => (courant === id ? undefined : courant));
       restore(id);
       return true;
     },
@@ -84,6 +99,8 @@ export function useDeleteBook() {
   return {
     scheduleDelete,
     cancelDelete,
+    /** Identifiant de l'ouvrage dont le sursis court, s'il y en a un. */
+    enAttente,
     isDeleting: isPending,
     undoDelayMs: UNDO_DELAY_MS,
     error,
