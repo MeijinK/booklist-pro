@@ -8,7 +8,7 @@ import { ListFooter } from "@/components/books/ListFooter";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { DEFAULT_LIMIT, type Book } from "@/domain";
-import { colors } from "@/theme";
+import { useThemedStyles, type Palette } from "@/theme";
 
 import { useBooks } from "./useBooks";
 
@@ -29,6 +29,7 @@ type Props = {
  * shows them exactly what they are about to lose.
  */
 export function BookList({ onOpen, onCreate }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const query = useBooks({ limit: DEFAULT_LIMIT });
 
   const books = useMemo(
@@ -97,17 +98,18 @@ function bookKey(book: Book): string {
   return book.id;
 }
 
-const styles = StyleSheet.create({
-  block: { backgroundColor: colors.background, flex: 1 },
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    block: { backgroundColor: colors.background, flex: 1 },
   // On the web, ProgressBar takes the full height of its parent: it needs a box
   // with a fixed height, otherwise it pushes the list off the screen.
-  progress: {
-    height: 4,
-    left: 0,
-    pointerEvents: "none",
-    position: "absolute",
-    right: 0,
-    top: 0,
-    zIndex: 1,
-  },
-});
+    progress: {
+      height: 4,
+      left: 0,
+      pointerEvents: "none",
+      position: "absolute",
+      right: 0,
+      top: 0,
+      zIndex: 1,
+    },
+  });

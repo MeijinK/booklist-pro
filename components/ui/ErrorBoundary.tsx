@@ -2,7 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { Button, Text } from "react-native-paper";
 
-import { colors, space } from "@/theme";
+import { lightColors, space } from "@/theme";
 
 type Props = { children: ReactNode };
 type State = { error: Error | undefined };
@@ -52,16 +52,24 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
+/**
+ * The only place that still names a variant outright.
+ *
+ * An error boundary must be a class component, so it cannot read the theme
+ * through a hook; and it sits above the theme provider on purpose, so that it
+ * still renders when the theme itself is what failed. The light palette is the
+ * deliberate choice for this last screen before a blank page.
+ */
 const styles = StyleSheet.create({
   block: {
     alignItems: "center",
-    backgroundColor: colors.background,
+    backgroundColor: lightColors.background,
     flexGrow: 1,
     gap: space.md,
     justifyContent: "center",
     padding: space.xl,
   },
   centered: { textAlign: "center" },
-  detail: { color: colors.textMuted, maxWidth: 440, textAlign: "center" },
+  detail: { color: lightColors.textMuted, maxWidth: 440, textAlign: "center" },
   button: { marginTop: space.sm },
 });
