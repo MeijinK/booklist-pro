@@ -9,7 +9,16 @@ export {
 export { NO_ENRICHMENT, type BookEnrichment } from "./enrichment";
 
 export {
+<<<<<<< HEAD
   NOTE_COUNTER_THRESHOLD, NOTE_MAX_LENGTH, NOTE_MAX_LENGTH,
+=======
+  NOTE_COUNTER_THRESHOLD,
+  NOTE_MAX_LENGTH,
+  NoteDraftSchema,
+  NoteSchema,
+  sortNotes,
+  type Note,
+>>>>>>> 9df3f42 (feat(domain): note validation rules and sort criteria)
   type NoteDraft
 } from "./note";
 
