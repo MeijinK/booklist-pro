@@ -9,7 +9,13 @@ import { z } from "zod";
 export const REQUEST_TIMEOUT_MS = 10_000;
 
 const BaseUrlSchema = z
-  .url("EXPO_PUBLIC_API_URL doit etre une URL absolue, par exemple http://localhost:3000.")
+  // Le protocole est verifie explicitement : sans cette contrainte, « localhost:3000 »
+  // passe pour une URL valide, de protocole « localhost », et chaque requete
+  // partirait vers nulle part sans que rien ne l'ait signale.
+  .url({
+    protocol: /^https?$/,
+    error: "EXPO_PUBLIC_API_URL doit etre une URL absolue, par exemple http://localhost:3000.",
+  })
   .refine(
     (value) => !value.endsWith("/"),
     "EXPO_PUBLIC_API_URL ne doit pas se terminer par une barre oblique.",
