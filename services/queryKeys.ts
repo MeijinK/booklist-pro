@@ -34,3 +34,14 @@ export const bookKeys = {
   details: () => [...bookKeys.all, "detail"] as const,
   detail: (id: string) => [...bookKeys.details(), id] as const,
 };
+
+/**
+ * Enrichment is keyed by title, not by book id: two records bearing the same
+ * title share one answer, and a list page of twenty rows costs far fewer
+ * lookups than it appears to.
+ */
+export const enrichmentKeys = {
+  all: ["enrichment"] as const,
+  byTitle: (title: string) =>
+    [...enrichmentKeys.all, title.trim().toLocaleLowerCase("fr-FR")] as const,
+};
