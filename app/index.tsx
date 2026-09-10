@@ -1,7 +1,6 @@
 import { Stack, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { View } from "react-native";
-
 import { Button } from "react-native-paper";
 
 import { ThemeMenu } from "@/components/ui/ThemeMenu";

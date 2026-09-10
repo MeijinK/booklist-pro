@@ -25,8 +25,9 @@ function Wrapper({ children }: { children: ReactNode }) {
 /**
  * Test render with the application theme.
  *
- * Without the provider, Paper falls back to its default Material theme: the
- * tests would pass on colours and fonts nobody will ever see in production.
+ * Without the providers, Paper falls back to its default Material theme and
+ * `useAppTheme` throws: the tests would either pass on colours nobody will ever
+ * see, or fail for a reason unrelated to what they check.
  *
  * Paper's icon renderer is deliberately left out: it comes from
  * `@expo/vector-icons`, which pulls `expo-asset` and cannot be loaded under
