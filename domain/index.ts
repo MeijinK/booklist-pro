@@ -9,7 +9,15 @@ export {
   type BookFormValues,
 } from "./book";
 
-export { NOTE_MAX_LENGTH, NoteSchema, type Note } from "./note";
+export {
+  NOTE_COUNTER_THRESHOLD,
+  NOTE_MAX_LENGTH,
+  NoteDraftSchema,
+  NoteSchema,
+  sortNotes,
+  type Note,
+  type NoteDraft,
+} from "./note";
 
 export { DEFAULT_LIMIT, MAX_LIMIT, pageSchema, type Page } from "./page";
 
@@ -31,10 +39,12 @@ export {
   DEFAULT_FILTERS,
   normalizeFilters,
   READ_STATUSES,
+  SORT_CHOICES,
   SORT_FIELDS,
   SORT_ORDERS,
   type BookFilters,
   type ReadStatus,
+  type SortChoice,
   type SortField,
   type SortOrder,
 } from "./filters";
