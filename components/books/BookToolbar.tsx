@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Divider, Menu, Searchbar } from "react-native-paper";
 
+import { DeferredMenu } from "@/components/ui/DeferredMenu";
+
 import { FilterChip } from "@/components/ui/FilterChip";
 import {
   SORT_CHOICES,
@@ -150,7 +152,7 @@ export function BookToolbar(props: Props) {
 
         <View style={styles.spacer} />
 
-        <Menu
+        <DeferredMenu
           visible={sorting}
           onDismiss={() => setSorting(false)}
           anchor={
@@ -184,7 +186,7 @@ export function BookToolbar(props: Props) {
               trailingIcon={order === value ? "check" : undefined}
             />
           ))}
-        </Menu>
+        </DeferredMenu>
       </View>
     </View>
   );
