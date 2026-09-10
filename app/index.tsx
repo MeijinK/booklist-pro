@@ -1,8 +1,10 @@
 import { Stack, useRouter } from "expo-router";
 import { useCallback } from "react";
 
+import { View } from "react-native";
 import { Button } from "react-native-paper";
 
+import { ThemeMenu } from "@/components/ui/ThemeMenu";
 import { BookList } from "@/features/books/BookList";
 
 /**
@@ -26,12 +28,17 @@ export default function BookListScreen() {
           offered in the empty state disappears as soon as a book exists. */}
       <Stack.Screen
         options={{
+          // This screen replaces the shared header action, so it carries the
+          // theme switch itself rather than dropping it.
           headerRight: () => (
-            // Without an explicit label, the icon glyph ends up in the button's
-            // accessible name and gets read out loud.
-            <Button accessibilityLabel="Ajouter" mode="text" icon="plus" onPress={create}>
-              Ajouter
-            </Button>
+            <View style={{ alignItems: "center", flexDirection: "row" }}>
+              {/* Without an explicit label, the icon glyph ends up in the
+                  button's accessible name and gets read out loud. */}
+              <Button accessibilityLabel="Ajouter" mode="text" icon="plus" onPress={create}>
+                Ajouter
+              </Button>
+              <ThemeMenu />
+            </View>
           ),
         }}
       />

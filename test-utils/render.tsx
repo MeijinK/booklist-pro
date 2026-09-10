@@ -2,10 +2,24 @@ import { render, type RenderOptions, type RenderResult } from "@testing-library/
 import type { ReactElement, ReactNode } from "react";
 import { PaperProvider } from "react-native-paper";
 
-import { paperTheme } from "@/theme";
+import { paperTheme, ThemeProvider, useAppTheme } from "@/theme";
+
+/**
+ * Paper needs the resolved scheme, which only exists inside our own provider:
+ * hence a second component rather than one nested pair at the top.
+ */
+function WithPaper({ children }: { children: ReactNode }) {
+  const { scheme } = useAppTheme();
+
+  return <PaperProvider theme={paperTheme(scheme)}>{children}</PaperProvider>;
+}
 
 function Wrapper({ children }: { children: ReactNode }) {
-  return <PaperProvider theme={paperTheme}>{children}</PaperProvider>;
+  return (
+    <ThemeProvider>
+      <WithPaper>{children}</WithPaper>
+    </ThemeProvider>
+  );
 }
 
 /**

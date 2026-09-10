@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { LoadingArea, Skeleton } from "@/components/ui/Skeleton";
-import { colors, space } from "@/theme";
+import { space, useThemedStyles, type Palette } from "@/theme";
 
 type Props = { rows?: number };
 
@@ -13,6 +13,8 @@ type Props = { rows?: number };
  * layout jump when the data arrives.
  */
 export function BookListSkeleton({ rows = 8 }: Props) {
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <LoadingArea label="Chargement du fonds">
       {Array.from({ length: rows }, (_, index) => (
@@ -30,16 +32,17 @@ export function BookListSkeleton({ rows = 8 }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderBottomColor: colors.border,
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    gap: space.md,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.md,
-  },
-  texts: { flexGrow: 1, gap: space.sm },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    row: {
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderBottomColor: colors.border,
+      borderBottomWidth: 1,
+      flexDirection: "row",
+      gap: space.md,
+      paddingHorizontal: space.lg,
+      paddingVertical: space.md,
+    },
+    texts: { flexGrow: 1, gap: space.sm },
+  });

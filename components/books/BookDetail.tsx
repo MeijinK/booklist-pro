@@ -5,7 +5,7 @@ import { Cover } from "@/components/ui/Cover";
 import { readableDate } from "@/components/ui/dates";
 import { ToggleControl } from "@/components/ui/ToggleControl";
 import type { Book } from "@/domain";
-import { colors, radius, space } from "@/theme";
+import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
   book: Book;
@@ -20,7 +20,9 @@ type Props = {
  * form are raised as callbacks, so this component stays mountable as is in a
  * test, and the optimistic write keeps a single owner in features/books.
  */
-export function BookDetail({ book, onToggleRead, onToggleFavourite }: Props) {
+export function BookDetail({ book }: Props) {
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <View style={styles.block}>
       <View style={styles.header}>
@@ -64,6 +66,8 @@ export function BookDetail({ book, onToggleRead, onToggleFavourite }: Props) {
 }
 
 function Row({ label, value }: { label: string; value: string }) {
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <View>
       <View style={styles.row}>
@@ -92,3 +96,27 @@ const styles = StyleSheet.create({
   row: { gap: space.xxs, padding: space.md },
   label: { color: colors.textMuted },
 });
+/** Falls back to the raw value: an unreadable date beats an "Invalid Date". */
+function readableDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+
+  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+}
+
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    block: { gap: space.xl, padding: space.lg },
+    header: { flexDirection: "row", gap: space.lg },
+    identity: { flexShrink: 1, gap: space.xs, justifyContent: "flex-start" },
+    badges: { flexDirection: "row", gap: space.sm, marginTop: space.sm },
+    fields: {
+      backgroundColor: colors.surface,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      overflow: "hidden",
+    },
+    row: { gap: space.xxs, padding: space.md },
+    label: { color: colors.textMuted },
+  });

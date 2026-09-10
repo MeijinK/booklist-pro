@@ -9,7 +9,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { Notice } from "@/components/ui/Notice";
 import { UndoBar } from "@/components/ui/UndoBar";
 import { NoteSection } from "@/features/notes/NoteSection";
-import { colors, space } from "@/theme";
+import { space, useAppTheme, useThemedStyles, type Palette } from "@/theme";
 
 import { useBook } from "./useBook";
 import { useDeleteBook } from "./useDeleteBook";
@@ -33,6 +33,9 @@ type Props = {
  * timer lives in services/mutations, not in this component.
  */
 export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
+  const styles = useThemedStyles(makeStyles);
+  // Paper's `textColor` takes a value, not a style: the palette is read here.
+  const { colors } = useAppTheme();
   const query = useBook(id);
   const [confirming, setConfirming] = useState(false);
   const deletion = useDeleteBook({ onDeleted });
@@ -131,13 +134,14 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  block: { backgroundColor: colors.background, flex: 1 },
-  content: { paddingBottom: space.xxxl * 2 },
-  actions: {
-    flexDirection: "row",
-    gap: space.sm,
-    justifyContent: "flex-end",
-    paddingHorizontal: space.lg,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    block: { backgroundColor: colors.background, flex: 1 },
+    content: { paddingBottom: space.xxxl * 2 },
+    actions: {
+      flexDirection: "row",
+      gap: space.sm,
+      justifyContent: "flex-end",
+      paddingHorizontal: space.lg,
+    },
+  });

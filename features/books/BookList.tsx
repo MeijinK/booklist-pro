@@ -10,7 +10,7 @@ import { ListFooter } from "@/components/books/ListFooter";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Notice } from "@/components/ui/Notice";
 import { DEFAULT_LIMIT, type Book } from "@/domain";
-import { colors } from "@/theme";
+import { useThemedStyles, type Palette } from "@/theme";
 
 import { isNarrowed, useBookQuery } from "./useBookQuery";
 import { useBooks } from "./useBooks";
@@ -138,9 +138,23 @@ function bookKey(book: Book): string {
   return book.id;
 }
 
-const styles = StyleSheet.create({
-  block: { backgroundColor: colors.background, flex: 1 },
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    block: { backgroundColor: colors.background, flex: 1 },
   // On the web, ProgressBar takes the full height of its parent: it needs a box
   // with a fixed height, otherwise it pushes the list off the screen.
+<<<<<<< HEAD
   progress: { height: 4 },
 });
+=======
+    progress: {
+      height: 4,
+      left: 0,
+      pointerEvents: "none",
+      position: "absolute",
+      right: 0,
+      top: 0,
+      zIndex: 1,
+    },
+  });
+>>>>>>> bf2baab (refactor: lire les couleurs depuis le theme courant)
