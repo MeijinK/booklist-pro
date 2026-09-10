@@ -1,0 +1,116 @@
+import { z } from "zod";
+
+import { NO_ENRICHMENT, type BookEnrichment } from "@/domain";
+
+/**
+ * Bibliographic enrichment through OpenLibrary.
+ *
+ * This call deliberately does NOT go through `services/api/client.ts`. That
+ * client speaks to the shop's own API: it prefixes its base URL, maps its error
+ * envelope, and throws. Here the rules are the opposite ones — a third-party
+ * host, and above all a promise that never rejects: an OpenLibrary outage must
+ * leave a record perfectly usable, so every failure degrades to NO_ENRICHMENT.
+ */
+
+const SEARCH_URL = "https://openlibrary.org/search.json";
+const COVERS_URL = "https://covers.openlibrary.org/b/id";
+
+/**
+ * Shorter than the main API's timeout. Enrichment is a nicety: waiting ten
+ * seconds for it would be worse than doing without.
+ */
+export const ENRICHMENT_TIMEOUT_MS = 5000;
+
+export type CoverSize = "S" | "M" | "L";
+
+/**
+ * Addressing a cover by its numeric id is the only form OpenLibrary does not
+ * rate-limit — unlike lookups by ISBN or OLID.
+ */
+export function openLibraryCoverUrl(coverId: number, size: CoverSize = "M"): string {
+  return `${COVERS_URL}/${coverId}-${size}.jpg`;
+}
+
+/** Only the three fields we display; `fields` keeps the payload small. */
+const SearchResponseSchema = z.object({
+  numFound: z.number().int().nonnegative(),
+  docs: z.array(
+    z.object({
+      title: z.string().optional(),
+      first_publish_year: z.number().int().optional(),
+      cover_i: z.number().int().optional(),
+    }),
+  ),
+});
+
+function buildUrl(title: string): string {
+  const params = new URLSearchParams({
+    title,
+    limit: "1",
+    fields: "title,first_publish_year,cover_i",
+  });
+
+  return `${SEARCH_URL}?${params.toString()}`;
+}
+
+export type EnrichmentOptions = {
+  signal?: AbortSignal;
+  size?: CoverSize;
+  timeoutMs?: number;
+};
+
+/**
+ * Never rejects, except when the caller cancels — a cancellation is not a
+ * failure, and swallowing it would make TanStack Query treat an abandoned
+ * request as an empty result.
+ */
+export async function fetchEnrichment(
+  title: string,
+  options: EnrichmentOptions = {},
+): Promise<BookEnrichment> {
+  const trimmed = title.trim();
+  if (trimmed === "") return NO_ENRICHMENT;
+
+  const controller = new AbortController();
+  const relayAbort = () => controller.abort();
+  const timer = setTimeout(relayAbort, options.timeoutMs ?? ENRICHMENT_TIMEOUT_MS);
+
+  if (options.signal?.aborted) {
+    controller.abort();
+  } else {
+    options.signal?.addEventListener("abort", relayAbort, { once: true });
+  }
+
+  try {
+    const response = await fetch(buildUrl(trimmed), {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) return NO_ENRICHMENT;
+
+    const parsed = SearchResponseSchema.safeParse(await response.json());
+    if (!parsed.success) return NO_ENRICHMENT;
+
+    return toEnrichment(parsed.data, options.size);
+  } catch (cause) {
+    if (options.signal?.aborted) throw cause;
+    return NO_ENRICHMENT;
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener("abort", relayAbort);
+  }
+}
+
+function toEnrichment(
+  data: z.infer<typeof SearchResponseSchema>,
+  size: CoverSize = "M",
+): BookEnrichment {
+  const first = data.docs[0];
+
+  return {
+    editionCount: data.numFound,
+    firstPublishYear: first?.first_publish_year ?? null,
+    coverUrl: first?.cover_i === undefined ? null : openLibraryCoverUrl(first.cover_i, size),
+  };
+}
