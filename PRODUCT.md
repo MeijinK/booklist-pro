@@ -56,6 +56,19 @@ Metier, pose, francais sans jargon technique. Le libraire lit « Aucun ouvrage
 ne porte ce titre » et non « 0 resultats ». Aucune exclamation, aucune
 familiarite, aucun emoji.
 
+## Perimetre ecarte
+
+**Envoi et retrait d'une couverture par le libraire.** Les routes
+`POST /books/:id/cover` et `DELETE /books/:id/cover` figurent a l'annexe du
+sujet, mais l'API livree (`api-books-v2`) n'expose aucune route de couverture :
+ni celles-la, ni la couverture generee `GET /covers/:id.svg`. Arbitrage du
+responsable produit : la fonctionnalite sort du perimetre plutot que d'etendre
+l'API.
+
+Consequence directe : le champ `couverture` vaut `null` sur les 500 ouvrages du
+fonds. L'affichage repose donc sur un service tiers quand l'ouvrage y est
+reference, et sur un repli local sinon. Voir ADR 004.
+
 ## Anti-references
 
 - **La papeterie nostalgique.** Sepia, papier vieilli, serif de titre, texture

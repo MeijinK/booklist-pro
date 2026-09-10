@@ -1,20 +1,3 @@
-/**
- * Writes with a deferred departure.
- *
- * Batch 1 requires that a deletion can be undone for five seconds. Deleting
- * then recreating is not an option: the recreation would yield a new
- * identifier, lose the attached notes and restart from version 1. The only
- * possible undo therefore consists of not having deleted yet.
- *
- * Pending operations live here, at module level, and not in a React effect: if
- * the bookseller leaves the screen during the delay, a timer owned by the
- * component would be destroyed with it and the deletion would never depart,
- * without anyone knowing.
- *
- * Accepted limit at batch 1: a full page reload loses the pending operations.
- * Batch 4's persistent queue is what will settle that case.
- */
-
 /** Grace period left to the bookseller to change their mind. */
 export const UNDO_DELAY_MS = 5000;
 
@@ -84,5 +67,7 @@ export function isPending(key: string): boolean {
 
 /** Keys still awaiting departure; lets a test clean up after itself. */
 export function pendingKeys(): string[] {
-  return [...pending.keys()];
+  // Array.from plutot qu'un spread : ne depend pas de downlevelIteration ni de
+  // la cible de compilation, qui varient selon le tsconfig actif.
+  return Array.from(pending.keys());
 }

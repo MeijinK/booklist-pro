@@ -3,6 +3,8 @@ export { BookRecord } from "./BookRecord";
 export { CreateBook } from "./CreateBook";
 export { EditBook } from "./EditBook";
 export { useBook } from "./useBook";
+export { useBookCover, type UseBookCoverOptions } from "./useBookCover";
+export { useBookEnrichment, type UseBookEnrichmentOptions } from "./useBookEnrichment";
 export { useBookForm, type BookForm } from "./useBookForm";
 export { useBookQuery, isNarrowed, DEFAULT_BOOK_QUERY, type BookQuery } from "./useBookQuery";
 export { useBooks } from "./useBooks";

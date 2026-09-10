@@ -36,12 +36,12 @@ export const bookKeys = {
 };
 
 /**
- * Notes live under their book, and not in a root `['notes', id]`.
- *
- * The hierarchy is what makes `bookKeys.all` expire a record together with its
- * notes: deleting a book must not leave its notes behind in the cache, ready to
- * be shown again the day another book reuses the screen.
+ * Enrichment is keyed by title, not by book id: two records bearing the same
+ * title share one answer, and a list page of twenty rows costs far fewer
+ * lookups than it appears to.
  */
-export const noteKeys = {
-  all: (bookId: string) => [...bookKeys.detail(bookId), "notes"] as const,
+export const enrichmentKeys = {
+  all: ["enrichment"] as const,
+  byTitle: (title: string) =>
+    [...enrichmentKeys.all, title.trim().toLocaleLowerCase("fr-FR")] as const,
 };

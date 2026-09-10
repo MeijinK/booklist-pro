@@ -9,15 +9,20 @@ export {
   type BookFormValues,
 } from "./book";
 
+export { NO_ENRICHMENT, type BookEnrichment } from "./enrichment";
+
+export { NOTE_MAX_LENGTH, NoteSchema, type Note } from "./note";
+
 export {
-  NOTE_COUNTER_THRESHOLD,
-  NOTE_MAX_LENGTH,
-  NoteDraftSchema,
-  NoteSchema,
-  sortNotes,
-  type Note,
-  type NoteDraft,
-} from "./note";
+  DEFAULT_LOCALE,
+  DEFAULT_THEME_PREFERENCE,
+  LOCALES,
+  parseLocale,
+  parseThemePreference,
+  THEME_PREFERENCES,
+  type Locale,
+  type ThemePreference,
+} from "./preferences";
 
 export { DEFAULT_LIMIT, MAX_LIMIT, pageSchema, type Page } from "./page";
 
