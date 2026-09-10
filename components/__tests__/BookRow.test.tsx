@@ -19,32 +19,68 @@ const BOOK: Book = {
   version: 3,
 };
 
+function renderRow(book: Book = BOOK, handlers: Partial<Handlers> = {}) {
+  const onOpen = handlers.onOpen ?? jest.fn();
+  const onToggleFavourite = handlers.onToggleFavourite ?? jest.fn();
+
+  renderWithTheme(<BookRow book={book} onOpen={onOpen} onToggleFavourite={onToggleFavourite} />);
+  return { onOpen, onToggleFavourite };
+}
+
+type Handlers = {
+  onOpen: jest.Mock;
+  onToggleFavourite: jest.Mock;
+};
+
 describe("BookRow", () => {
   it("displays the title and the attribution line", () => {
-    renderWithTheme(<BookRow book={BOOK} onOpen={jest.fn()} />);
+    renderRow();
 
     expect(screen.getByText("La Horde du Contrevent")).toBeTruthy();
     expect(screen.getByText("Alain Damasio · La Volte · 2004")).toBeTruthy();
   });
 
   it("marks the status with text, and not with colour alone", () => {
-    renderWithTheme(<BookRow book={BOOK} onOpen={jest.fn()} />);
+    renderRow();
 
     expect(screen.getByText("lu")).toBeTruthy();
   });
 
   it("displays no status for an unread book", () => {
-    renderWithTheme(<BookRow book={{ ...BOOK, lu: false }} onOpen={jest.fn()} />);
+    renderRow({ ...BOOK, lu: false });
 
     expect(screen.queryByText("lu")).toBeNull();
   });
 
   it("opens the record with the book identifier", () => {
-    const onOpen = jest.fn();
-    renderWithTheme(<BookRow book={BOOK} onOpen={onOpen} />);
+    const { onOpen } = renderRow();
 
     fireEvent.press(screen.getByRole("link", { name: /La Horde du Contrevent/ }));
 
     expect(onOpen).toHaveBeenCalledWith("l-1");
+  });
+
+  it("announces the coup de coeur as a state, not as an action", () => {
+    renderRow({ ...BOOK, favori: true });
+
+    const heart = screen.getByRole("switch", { name: /Coup de coeur, La Horde du Contrevent/ });
+    expect(heart.props.accessibilityState.checked).toBe(true);
+  });
+
+  it("announces an unset coup de coeur as unchecked", () => {
+    renderRow();
+
+    const heart = screen.getByRole("switch", { name: /Coup de coeur/ });
+    expect(heart.props.accessibilityState.checked).toBe(false);
+  });
+
+  it("raises the coup de coeur with the book, without opening the record", () => {
+    const { onOpen, onToggleFavourite } = renderRow();
+
+    fireEvent.press(screen.getByRole("switch", { name: /Coup de coeur/ }));
+
+    expect(onToggleFavourite).toHaveBeenCalledWith(BOOK);
+    // The heart sits outside the row's pressable area: a tap must not navigate.
+    expect(onOpen).not.toHaveBeenCalled();
   });
 });

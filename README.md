@@ -54,8 +54,9 @@ le 8081 reste libre pour `npx expo start --web`, les deux peuvent donc tourner e
 
 - **Domaine et services** — `domain/__tests__/`, `services/__tests__/` : règles métier pures et résolution des couvertures, sans réseau.
 - **Composants** — `components/__tests__/`, preset `jest-expo`, requêtes par rôle et par texte (jamais par structure DOM).
-- **Hooks de données** — `features/books/__tests__/`, `fetch` simulé, pagination et erreurs discriminées.
-- **Bout en bout** — `e2e/`, un parcours critique dans un vrai navigateur sur le bundle réellement livré.
+- **Hooks de données** — `features/books/__tests__/`, `features/notes/__tests__/` : `fetch` simulé, pagination, écritures optimistes et retours arrière.
+- **Hooks génériques** — `hooks/__tests__/`, minuteurs simulés pour l'anti-rebond de la recherche.
+- **Bout en bout** — `e2e/`, les parcours critiques dans un vrai navigateur sur le bundle réellement livré (`support/api.ts` porte les mocks partagés).
 
 ## Intégration continue
 
@@ -74,4 +75,5 @@ Les rapports de couverture et Playwright sont publiés en artefacts du run (7 jo
 
 - `PRODUCT.md` — utilisateurs, scène d'usage, principes et anti-références
 - `AGENTS.md` — règles d'architecture et contrat de qualité
-- `docs/ADR/`, `docs/ARCHITECTURE.md`, `docs/PERFORMANCE.md`, `IA.md`
+- `docs/ADR/` — décisions d'architecture, dont l'ADR 005 sur les écritures optimistes et la concurrence des bascules
+- `docs/ARCHITECTURE.md`, `docs/PERFORMANCE.md`, `IA.md`

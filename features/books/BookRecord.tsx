@@ -6,11 +6,14 @@ import { BookDetail } from "@/components/books/BookDetail";
 import { BookDetailSkeleton } from "@/components/books/BookDetailSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { Notice } from "@/components/ui/Notice";
 import { UndoBar } from "@/components/ui/UndoBar";
+import { NoteSection } from "@/features/notes/NoteSection";
 import { space, useAppTheme, useThemedStyles, type Palette } from "@/theme";
 
 import { useBook } from "./useBook";
 import { useDeleteBook } from "./useDeleteBook";
+import { toggleRefusalMessage, useToggleBook } from "./useToggleBook";
 
 type Props = {
   id: string;
@@ -36,6 +39,7 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
   const query = useBook(id);
   const [confirming, setConfirming] = useState(false);
   const deletion = useDeleteBook({ onDeleted });
+  const toggle = useToggleBook();
 
   if (query.isPending) return <BookDetailSkeleton />;
 
@@ -61,7 +65,16 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
       <ScrollView contentContainerStyle={styles.content}>
         {deletion.error === undefined ? null : <ErrorState banner error={deletion.error} />}
 
-        <BookDetail book={book} />
+        <BookDetail
+          book={book}
+          onToggleRead={(lu) => toggle.mutate({ id: book.id, changes: { lu } })}
+          onToggleFavourite={(favori) => toggle.mutate({ id: book.id, changes: { favori } })}
+        />
+
+        {/* The notes come before the administrative actions: they are what the
+            bookseller opened the record for, and correcting or deleting the
+            entry is the rarer gesture. */}
+        <NoteSection bookId={book.id} />
 
         <View style={styles.actions}>
           <Button mode="contained" onPress={() => onEdit(book.id)}>
@@ -110,6 +123,12 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
           message={`« ${book.titre} » a ete retire du fonds.`}
           onUndo={() => deletion.cancelDelete(book.id)}
         />
+      ) : null}
+
+      {/* Never at the same time as the undo bar: two stacked snackbars hide
+          each other, and losing a record weighs more than a refused heart. */}
+      {!undoPending && toggle.isError && toggle.variables !== undefined ? (
+        <Notice message={toggleRefusalMessage(toggle.variables.changes)} onDismiss={toggle.reset} />
       ) : null}
     </View>
   );

@@ -1,17 +1,26 @@
 import { StyleSheet, View } from "react-native";
-import { Chip, Divider, Text } from "react-native-paper";
+import { Divider, Text } from "react-native-paper";
 
 import { Cover } from "@/components/ui/Cover";
+import { readableDate } from "@/components/ui/dates";
+import { ToggleControl } from "@/components/ui/ToggleControl";
 import type { Book } from "@/domain";
 import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
-type Props = { book: Book };
+type Props = {
+  book: Book;
+  onToggleRead: (lu: boolean) => void;
+  onToggleFavourite: (favori: boolean) => void;
+};
 
 /**
- * Presentation of a book record. No network access, no action: this component
- * only displays, which makes it mountable as is in a test.
+ * Presentation of a book record.
+ *
+ * No network access here: the two states a bookseller flips without opening the
+ * form are raised as callbacks, so this component stays mountable as is in a
+ * test, and the optimistic write keeps a single owner in features/books.
  */
-export function BookDetail({ book }: Props) {
+export function BookDetail({ book, onToggleRead, onToggleFavourite }: Props) {
   const styles = useThemedStyles(makeStyles);
 
   return (
@@ -22,15 +31,23 @@ export function BookDetail({ book }: Props) {
         <View style={styles.identity}>
           <Text variant="headlineMedium">{book.titre}</Text>
           <Text variant="bodyLarge">{book.auteur}</Text>
+          {/* Read status and coup de coeur are the two things the team keeps
+              up to date all day: they are flipped here, not behind the form. */}
           <View style={styles.badges}>
-            <Chip compact mode={book.lu ? "flat" : "outlined"}>
-              {book.lu ? "lu" : "non lu"}
-            </Chip>
-            {book.favori ? (
-              <Chip compact icon="heart" mode="flat">
-                coup de coeur
-              </Chip>
-            ) : null}
+            <ToggleControl
+              checked={book.lu}
+              icon={{ on: "check-circle", off: "check-circle-outline" }}
+              label={book.lu ? "Lu" : "Non lu"}
+              name="Statut de lecture"
+              onToggle={onToggleRead}
+            />
+            <ToggleControl
+              checked={book.favori}
+              icon={{ on: "heart", off: "heart-outline" }}
+              label="Coup de coeur"
+              name="Coup de coeur"
+              onToggle={onToggleFavourite}
+            />
           </View>
         </View>
       </View>
@@ -64,20 +81,12 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** Falls back to the raw value: an unreadable date beats an "Invalid Date". */
-function readableDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-
-  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-}
-
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     block: { gap: space.xl, padding: space.lg },
     header: { flexDirection: "row", gap: space.lg },
     identity: { flexShrink: 1, gap: space.xs, justifyContent: "flex-start" },
-    badges: { flexDirection: "row", gap: space.sm, marginTop: space.sm },
+    badges: { flexDirection: "row", flexWrap: "wrap", gap: space.sm, marginTop: space.sm },
     fields: {
       backgroundColor: colors.surface,
       borderColor: colors.border,

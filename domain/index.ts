@@ -1,17 +1,22 @@
 export {
   BookDraftSchema,
   BookFormSchema,
-  BookSchema,
-  MIN_PUBLICATION_YEAR,
-  maxPublicationYear,
-  type Book,
+  BookSchema, maxPublicationYear, MIN_PUBLICATION_YEAR, type Book,
   type BookDraft,
-  type BookFormValues,
+  type BookFormValues
 } from "./book";
 
 export { NO_ENRICHMENT, type BookEnrichment } from "./enrichment";
 
-export { NOTE_MAX_LENGTH, NoteSchema, type Note } from "./note";
+export {
+  NOTE_COUNTER_THRESHOLD,
+  NOTE_MAX_LENGTH,
+  NoteDraftSchema,
+  NoteSchema,
+  sortNotes,
+  type Note,
+  type NoteDraft
+} from "./note";
 
 export {
   DEFAULT_LOCALE,
@@ -21,7 +26,7 @@ export {
   parseThemePreference,
   THEME_PREFERENCES,
   type Locale,
-  type ThemePreference,
+  type ThemePreference
 } from "./preferences";
 
 export { DEFAULT_LIMIT, MAX_LIMIT, pageSchema, type Page } from "./page";
@@ -37,17 +42,20 @@ export {
   type ConflictError,
   type NetworkError,
   type NotFoundError,
-  type ValidationError,
+  type ValidationError
 } from "./errors";
 
 export {
   DEFAULT_FILTERS,
   normalizeFilters,
   READ_STATUSES,
+  SORT_CHOICES,
   SORT_FIELDS,
   SORT_ORDERS,
   type BookFilters,
   type ReadStatus,
+  type SortChoice,
   type SortField,
-  type SortOrder,
+  type SortOrder
 } from "./filters";
+

@@ -1,4 +1,5 @@
 import { Stack, useRouter } from "expo-router";
+import { useCallback } from "react";
 import { View } from "react-native";
 import { Button } from "react-native-paper";
 
@@ -11,7 +12,14 @@ import { BookList } from "@/features/books/BookList";
  */
 export default function BookListScreen() {
   const router = useRouter();
-  const create = () => router.push("/books/new");
+  const create = useCallback(() => router.push("/books/new"), [router]);
+
+  // Stable identity down to the memoised rows: recreated on every render, this
+  // callback alone would redraw the whole list on each keystroke.
+  const open = useCallback(
+    (id: string) => router.push({ pathname: "/books/[id]", params: { id } }),
+    [router],
+  );
 
   return (
     <>
@@ -34,10 +42,7 @@ export default function BookListScreen() {
         }}
       />
 
-      <BookList
-        onOpen={(id) => router.push({ pathname: "/books/[id]", params: { id } })}
-        onCreate={create}
-      />
+      <BookList onOpen={open} onCreate={create} />
     </>
   );
 }

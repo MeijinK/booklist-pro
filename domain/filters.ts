@@ -16,6 +16,15 @@ export type ReadStatus = (typeof READ_STATUSES)[number];
 export type SortField = (typeof SORT_FIELDS)[number];
 export type SortOrder = (typeof SORT_ORDERS)[number];
 
+/**
+ * The criteria a bookseller sorts on, which are not all the ones the API
+ * accepts: `updatedAt` orders a synchronisation, not a shelf, and offering it
+ * at the counter would add a choice nobody makes.
+ */
+export const SORT_CHOICES = ["titre", "auteur", "annee", "note"] as const satisfies readonly SortField[];
+
+export type SortChoice = (typeof SORT_CHOICES)[number];
+
 /** A missing field is not sent: the server then applies its own default. */
 export type BookFilters = {
   page?: number;

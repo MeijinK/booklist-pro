@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { IconButton, Menu } from "react-native-paper";
 
+import { DeferredMenu } from "@/components/ui/DeferredMenu";
+
 import { THEME_PREFERENCES, type ThemePreference } from "@/domain";
 import { useAppTheme } from "@/theme";
 
@@ -32,7 +34,7 @@ export function ThemeMenu() {
   const [open, setOpen] = useState(false);
 
   return (
-    <Menu
+    <DeferredMenu
       visible={open}
       onDismiss={() => setOpen(false)}
       anchor={
@@ -59,6 +61,6 @@ export function ThemeMenu() {
           }}
         />
       ))}
-    </Menu>
+    </DeferredMenu>
   );
 }
