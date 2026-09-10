@@ -4,7 +4,14 @@ export { CreateBook } from "./CreateBook";
 export { EditBook } from "./EditBook";
 export { useBook } from "./useBook";
 export { useBookForm, type BookForm } from "./useBookForm";
+export { useBookQuery, isNarrowed, DEFAULT_BOOK_QUERY, type BookQuery } from "./useBookQuery";
 export { useBooks } from "./useBooks";
 export { useCreateBook } from "./useCreateBook";
 export { useDeleteBook, type DeleteBookOptions } from "./useDeleteBook";
+export {
+  toggleRefusalMessage,
+  useToggleBook,
+  type BookToggleChanges,
+  type BookToggleInput,
+} from "./useToggleBook";
 export { useUpdateBook, type UpdateBookInput } from "./useUpdateBook";

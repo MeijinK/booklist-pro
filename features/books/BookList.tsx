@@ -1,16 +1,20 @@
-import { useMemo } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { useCallback, useMemo } from "react";
+import { FlatList, StyleSheet, View, type ListRenderItemInfo } from "react-native";
 import { ProgressBar } from "react-native-paper";
 
+import { BookListEmpty } from "@/components/books/BookListEmpty";
 import { BookListSkeleton } from "@/components/books/BookListSkeleton";
 import { BookRow } from "@/components/books/BookRow";
+import { BookToolbar } from "@/components/books/BookToolbar";
 import { ListFooter } from "@/components/books/ListFooter";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { Notice } from "@/components/ui/Notice";
 import { DEFAULT_LIMIT, type Book } from "@/domain";
 import { colors } from "@/theme";
 
+import { isNarrowed, useBookQuery } from "./useBookQuery";
 import { useBooks } from "./useBooks";
+import { toggleRefusalMessage, useToggleBook } from "./useToggleBook";
 
 type Props = {
   onOpen: (id: string) => void;
@@ -18,18 +22,21 @@ type Props = {
 };
 
 /**
- * Collection screen: the four required states, and nothing else.
+ * Collection screen: search, filters, sort, and the four required states.
  *
- * Navigation arrives through callbacks rather than through the router: the list
- * therefore stays mountable in a test without a router, and the screen in
- * `app/` keeps the responsibility for routes.
+ * The toolbar is mounted once and never unmounted. Rebuilding it under a
+ * skeleton on every filter change would take the focus and the typed text away
+ * from a bookseller in the middle of a search, which is exactly when they can
+ * least afford it.
  *
  * Deletion is not triggered here but from the book record: the five-second
  * grace period must appear where the bookseller just acted, and an open record
  * shows them exactly what they are about to lose.
  */
 export function BookList({ onOpen, onCreate }: Props) {
-  const query = useBooks({ limit: DEFAULT_LIMIT });
+  const criteria = useBookQuery();
+  const query = useBooks(criteria.filters);
+  const toggle = useToggleBook();
 
   const books = useMemo(
     () => query.data?.pages.flatMap((page) => page.items) ?? [],
@@ -37,58 +44,92 @@ export function BookList({ onOpen, onCreate }: Props) {
   );
 
   const total = query.data?.pages[0]?.total ?? 0;
+  const narrowed = isNarrowed(criteria.query);
 
-  // First load: nothing on screen, hence a skeleton. Later refreshes keep the
-  // list and report themselves through the thin bar.
-  if (query.isPending) return <BookListSkeleton />;
+  // Destructured rather than called through the object: `mutate` keeps a stable
+  // identity across renders where the mutation object does not, and that
+  // stability is what lets the memoised rows skip a redraw.
+  const { mutate: toggleBook } = toggle;
 
-  if (query.isError && books.length === 0) {
-    return <ErrorState error={query.error} onRetry={() => void query.refetch()} />;
-  }
+  const toggleFavourite = useCallback(
+    (book: Book) => toggleBook({ id: book.id, changes: { favori: !book.favori } }),
+    [toggleBook],
+  );
 
-  if (books.length === 0) {
-    return (
-      <EmptyState
-        title="Le fonds est vide"
-        description="Aucun ouvrage n'a encore ete saisi pour cette boutique. Commencez par en ajouter un : le cahier se remplit ensuite tout seul."
-        action={{ label: "Ajouter un ouvrage", onPress: onCreate }}
-      />
-    );
-  }
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<Book>) => (
+      <BookRow book={item} onOpen={onOpen} onToggleFavourite={toggleFavourite} />
+    ),
+    [onOpen, toggleFavourite],
+  );
 
   return (
     <View style={styles.block}>
+      <BookToolbar
+        search={criteria.query.q}
+        status={criteria.query.status}
+        favouritesOnly={criteria.query.favori === true}
+        sort={criteria.query.sort}
+        order={criteria.query.order}
+        onSearchChange={criteria.setSearch}
+        onStatusChange={criteria.setStatus}
+        onFavouritesChange={criteria.setFavourites}
+        onSortChange={criteria.setSort}
+        onOrderChange={criteria.setOrder}
+      />
+
       {/* A background refresh reports itself through a thin bar, without
           replacing the list: replacing it with a skeleton would make the screen
-          flicker on every revalidation. Laid above the content and transparent
-          to clicks, otherwise it intercepts the first row. */}
+          flicker on every revalidation. The box keeps its height at rest, so
+          the list does not jump when the bar appears. */}
       <View style={styles.progress}>
         <ProgressBar indeterminate visible={query.isFetching && !query.isFetchingNextPage} />
       </View>
 
+      {query.isPending ? <BookListSkeleton /> : null}
+
+      {query.isError && books.length === 0 ? (
+        <ErrorState error={query.error} onRetry={() => void query.refetch()} />
+      ) : null}
+
       {/* An error that occurs while data is already displayed does not erase it:
           the bookseller keeps consulting what they have. */}
-      {query.isError ? (
+      {query.isError && books.length > 0 ? (
         <ErrorState banner error={query.error} onRetry={() => void query.refetch()} />
       ) : null}
 
-      <FlatList
-        data={books}
-        keyExtractor={bookKey}
-        renderItem={({ item }) => <BookRow book={item} onOpen={onOpen} />}
-        // The server paginates: we only ask for more on an explicit gesture,
-        // page by page, never the five hundred books at once.
-        ListFooterComponent={
-          <ListFooter
-            loaded={books.length}
-            total={total}
-            perPage={DEFAULT_LIMIT}
-            hasMore={query.hasNextPage}
-            loading={query.isFetchingNextPage}
-            onLoadMore={() => void query.fetchNextPage()}
-          />
-        }
-      />
+      {query.isSuccess && books.length === 0 ? (
+        <BookListEmpty
+          narrowed={narrowed}
+          onClear={criteria.clear}
+          onCreate={onCreate}
+          search={criteria.query.q}
+        />
+      ) : null}
+
+      {books.length > 0 ? (
+        <FlatList
+          data={books}
+          keyExtractor={bookKey}
+          renderItem={renderItem}
+          // The server paginates: we only ask for more on an explicit gesture,
+          // page by page, never the five hundred books at once.
+          ListFooterComponent={
+            <ListFooter
+              loaded={books.length}
+              total={total}
+              perPage={DEFAULT_LIMIT}
+              hasMore={query.hasNextPage}
+              loading={query.isFetchingNextPage}
+              onLoadMore={() => void query.fetchNextPage()}
+            />
+          }
+        />
+      ) : null}
+
+      {toggle.isError && toggle.variables !== undefined ? (
+        <Notice message={toggleRefusalMessage(toggle.variables.changes)} onDismiss={toggle.reset} />
+      ) : null}
     </View>
   );
 }
@@ -101,13 +142,5 @@ const styles = StyleSheet.create({
   block: { backgroundColor: colors.background, flex: 1 },
   // On the web, ProgressBar takes the full height of its parent: it needs a box
   // with a fixed height, otherwise it pushes the list off the screen.
-  progress: {
-    height: 4,
-    left: 0,
-    pointerEvents: "none",
-    position: "absolute",
-    right: 0,
-    top: 0,
-    zIndex: 1,
-  },
+  progress: { height: 4 },
 });
