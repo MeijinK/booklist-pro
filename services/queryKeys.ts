@@ -34,3 +34,14 @@ export const bookKeys = {
   details: () => [...bookKeys.all, "detail"] as const,
   detail: (id: string) => [...bookKeys.details(), id] as const,
 };
+
+/**
+ * Notes live under their book, and not in a root `['notes', id]`.
+ *
+ * The hierarchy is what makes `bookKeys.all` expire a record together with its
+ * notes: deleting a book must not leave its notes behind in the cache, ready to
+ * be shown again the day another book reuses the screen.
+ */
+export const noteKeys = {
+  all: (bookId: string) => [...bookKeys.detail(bookId), "notes"] as const,
+};
