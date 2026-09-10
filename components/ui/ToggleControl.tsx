@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { Icon, Text, TouchableRipple } from "react-native-paper";
 
-import { colors, radius, space } from "@/theme";
+import { radius, space, useAppTheme, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
   checked: boolean;
@@ -26,6 +26,9 @@ type Props = {
  * gets the same thing as whoever reads "Lu" in a filled box.
  */
 export function ToggleControl({ checked, label, name, icon, onToggle }: Props) {
+  const styles = useThemedStyles(makeStyles);
+  const { colors } = useAppTheme();
+
   return (
     <TouchableRipple
       accessibilityLabel={name}
@@ -53,17 +56,18 @@ export function ToggleControl({ checked, label, name, icon, onToggle }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  control: {
-    borderRadius: radius.md,
-    borderWidth: 1,
-    height: 44,
-    justifyContent: "center",
-    paddingHorizontal: space.md,
-  },
-  on: { backgroundColor: colors.accentBackground, borderColor: colors.accentBorder },
-  off: { backgroundColor: colors.surface, borderColor: colors.borderStrong },
-  content: { alignItems: "center", flexDirection: "row", gap: space.sm },
-  labelOn: { color: colors.accentPressed },
-  labelOff: { color: colors.text },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    control: {
+      borderRadius: radius.md,
+      borderWidth: 1,
+      height: 44,
+      justifyContent: "center",
+      paddingHorizontal: space.md,
+    },
+    on: { backgroundColor: colors.accentBackground, borderColor: colors.accentBorder },
+    off: { backgroundColor: colors.surface, borderColor: colors.borderStrong },
+    content: { alignItems: "center", flexDirection: "row", gap: space.sm },
+    labelOn: { color: colors.accentPressed },
+    labelOff: { color: colors.text },
+  });

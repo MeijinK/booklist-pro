@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { IconButton } from "react-native-paper";
 
-import { colors } from "@/theme";
+import { useAppTheme } from "@/theme";
 
 type Props = {
   favourite: boolean;
@@ -22,6 +22,8 @@ type Props = {
  * flip and not an action whose result has to be guessed.
  */
 export function FavouriteButton({ favourite, title, onToggle }: Props) {
+  const { colors } = useAppTheme();
+
   return (
     <IconButton
       accessibilityLabel={`Coup de coeur, ${title}`}

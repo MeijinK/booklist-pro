@@ -7,7 +7,7 @@ import { NoteListSkeleton } from "@/components/notes/NoteListSkeleton";
 import { NoteRow } from "@/components/notes/NoteRow";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
-import { colors, radius, space } from "@/theme";
+import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
 import { isLocalNote, useCreateNote } from "./useCreateNote";
 import { useDeleteNote } from "./useDeleteNote";
@@ -24,6 +24,7 @@ type Props = { bookId: string };
  * not hold back notes that are already there.
  */
 export function NoteSection({ bookId }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const query = useNotes(bookId);
   const creation = useCreateNote(bookId);
   const deletion = useDeleteNote(bookId);
@@ -89,15 +90,16 @@ export function NoteSection({ bookId }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  block: { gap: space.md, paddingHorizontal: space.lg, paddingTop: space.xl },
-  header: { alignItems: "baseline", flexDirection: "row", gap: space.sm },
-  count: { color: colors.textMuted },
-  list: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    paddingHorizontal: space.md,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    block: { gap: space.md, paddingHorizontal: space.lg, paddingTop: space.xl },
+    header: { alignItems: "baseline", flexDirection: "row", gap: space.sm },
+    count: { color: colors.textMuted },
+    list: {
+      backgroundColor: colors.surface,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      paddingHorizontal: space.md,
+    },
+  });

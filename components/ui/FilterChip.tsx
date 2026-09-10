@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { Chip } from "react-native-paper";
 
-import { colors, radius } from "@/theme";
+import { radius, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
   /** What the chip shows. Short: the row must survive a 480 px window. */
@@ -29,6 +29,8 @@ type Props = {
  * container alone would leave a 44 pt chip with a 32 pt touch target.
  */
 export function FilterChip({ label, name, selected, onPress, icon }: Props) {
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <Chip
       accessibilityLabel={`${name}, ${selected ? "actif" : "inactif"}`}
@@ -47,10 +49,11 @@ export function FilterChip({ label, name, selected, onPress, icon }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  chip: { borderRadius: radius.md },
-  selected: { backgroundColor: colors.accentBackground, borderColor: colors.accentBorder },
-  unselected: { backgroundColor: colors.surface, borderColor: colors.borderStrong },
-  /** 20 pt of line plus 2 x 12 of margin: a 44 pt target, ripple included. */
-  label: { marginVertical: 12 },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    chip: { borderRadius: radius.md },
+    selected: { backgroundColor: colors.accentBackground, borderColor: colors.accentBorder },
+    unselected: { backgroundColor: colors.surface, borderColor: colors.borderStrong },
+    /** 20 pt of line plus 2 x 12 of margin: a 44 pt target, ripple included. */
+    label: { marginVertical: 12 },
+  });

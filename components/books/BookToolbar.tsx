@@ -11,7 +11,7 @@ import {
   type SortOrder,
 } from "@/domain";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
-import { colors, space } from "@/theme";
+import { space, useThemedStyles, type Palette } from "@/theme";
 
 /** Long enough to let a word be typed, short enough to feel immediate. */
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -60,6 +60,7 @@ type Props = {
  * decision, not a draft, and delaying it by 300 ms would only look broken.
  */
 export function BookToolbar(props: Props) {
+  const styles = useThemedStyles(makeStyles);
   const { search, status, favouritesOnly, sort, order } = props;
   const { onSearchChange, onStatusChange, onFavouritesChange, onSortChange, onOrderChange } = props;
 
@@ -189,22 +190,23 @@ export function BookToolbar(props: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  // A control layer, not content: the sunken surface is what tells the
-  // bookseller where the list stops being read and starts being steered.
-  block: {
-    backgroundColor: colors.surfaceSunken,
-    borderBottomColor: colors.border,
-    borderBottomWidth: 1,
-    gap: space.sm,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.md,
-  },
-  search: { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 },
-  controls: { alignItems: "center", flexDirection: "row", flexWrap: "wrap", gap: space.sm },
-  // The statuses are one choice among three: they are glued together, and the
-  // independent coup de coeur filter sits at a normal distance from them.
-  chips: { flexDirection: "row", gap: space.xs },
-  spacer: { flexGrow: 1 },
-  sort: { justifyContent: "center", minHeight: 44 },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    // A control layer, not content: the sunken surface is what tells the
+    // bookseller where the list stops being read and starts being steered.
+    block: {
+      backgroundColor: colors.surfaceSunken,
+      borderBottomColor: colors.border,
+      borderBottomWidth: 1,
+      gap: space.sm,
+      paddingHorizontal: space.lg,
+      paddingVertical: space.md,
+    },
+    search: { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 },
+    controls: { alignItems: "center", flexDirection: "row", flexWrap: "wrap", gap: space.sm },
+    // The statuses are one choice among three: they are glued together, and the
+    // independent coup de coeur filter sits at a normal distance from them.
+    chips: { flexDirection: "row", gap: space.xs },
+    spacer: { flexGrow: 1 },
+    sort: { justifyContent: "center", minHeight: 44 },
+  });

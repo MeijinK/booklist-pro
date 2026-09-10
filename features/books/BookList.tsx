@@ -39,7 +39,6 @@ export function BookList({ onOpen, onCreate }: Props) {
   const toggle = useToggleBook();
   const styles = useThemedStyles(makeStyles);
 
-
   const books = useMemo(
     () => query.data?.pages.flatMap((page) => page.items) ?? [],
     [query.data],
@@ -143,8 +142,8 @@ function bookKey(book: Book): string {
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     block: { backgroundColor: colors.background, flex: 1 },
-  // On the web, ProgressBar takes the full height of its parent: it needs a box
-  // with a fixed height, otherwise it pushes the list off the screen.
+    // On the web, ProgressBar takes the full height of its parent: it needs a
+    // box with a fixed height, otherwise it pushes the list off the screen.
     progress: {
       height: 4,
       left: 0,

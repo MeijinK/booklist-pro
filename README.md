@@ -75,5 +75,5 @@ Les rapports de couverture et Playwright sont publiés en artefacts du run (7 jo
 
 - `PRODUCT.md` — utilisateurs, scène d'usage, principes et anti-références
 - `AGENTS.md` — règles d'architecture et contrat de qualité
-- `docs/ADR/` — décisions d'architecture, dont l'ADR 004 sur les écritures optimistes et la concurrence des bascules
+- `docs/ADR/` — décisions d'architecture, dont l'ADR 005 sur les écritures optimistes et la concurrence des bascules
 - `docs/ARCHITECTURE.md`, `docs/PERFORMANCE.md`, `IA.md`

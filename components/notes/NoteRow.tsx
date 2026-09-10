@@ -4,7 +4,7 @@ import { Button, IconButton, Text } from "react-native-paper";
 
 import { readableDateTime } from "@/components/ui/dates";
 import type { Note } from "@/domain";
-import { colors, radius, space } from "@/theme";
+import { radius, space, useAppTheme, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
   note: Note;
@@ -24,6 +24,8 @@ type Props = {
  * steps aside, because there is nothing to delete server-side yet.
  */
 export const NoteRow = memo(function NoteRow({ note, sending, onDelete }: Props) {
+  const styles = useThemedStyles(makeStyles);
+  const { colors } = useAppTheme();
   const [confirming, setConfirming] = useState(false);
 
   return (
@@ -75,26 +77,27 @@ export const NoteRow = memo(function NoteRow({ note, sending, onDelete }: Props)
   );
 });
 
-const styles = StyleSheet.create({
-  // No separator of its own: the section draws them between rows, so the last
-  // note does not end on a line doubling the panel's own border.
-  block: { gap: space.xxs, paddingBottom: space.md, paddingTop: space.sm },
-  header: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
-  stamp: { color: colors.textMuted },
-  remove: { height: 44, margin: 0, width: 44 },
-  /** The text stays readable while it travels; only its weight says it is not settled. */
-  pending: { color: colors.textMuted },
-  confirm: {
-    alignItems: "center",
-    backgroundColor: colors.destructiveBackground,
-    borderRadius: radius.md,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: space.xs,
-    marginTop: space.sm,
-    paddingHorizontal: space.md,
-    paddingVertical: space.xs,
-  },
-  question: { color: colors.destructivePressed, flexGrow: 1, flexShrink: 1 },
-  action: { justifyContent: "center", minHeight: 44 },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    // No separator of its own: the section draws them between rows, so the last
+    // note does not end on a line doubling the panel's own border.
+    block: { gap: space.xxs, paddingBottom: space.md, paddingTop: space.sm },
+    header: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+    stamp: { color: colors.textMuted },
+    remove: { height: 44, margin: 0, width: 44 },
+    /** The text stays readable while it travels; only its weight says it is not settled. */
+    pending: { color: colors.textMuted },
+    confirm: {
+      alignItems: "center",
+      backgroundColor: colors.destructiveBackground,
+      borderRadius: radius.md,
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: space.xs,
+      marginTop: space.sm,
+      paddingHorizontal: space.md,
+      paddingVertical: space.xs,
+    },
+    question: { color: colors.destructivePressed, flexGrow: 1, flexShrink: 1 },
+    action: { justifyContent: "center", minHeight: 44 },
+  });

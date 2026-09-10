@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { Button, HelperText, TextInput } from "react-native-paper";
 
 import { NOTE_COUNTER_THRESHOLD, NOTE_MAX_LENGTH, NoteDraftSchema } from "@/domain";
-import { colors, space } from "@/theme";
+import { space, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
   /** Answers true once the note is recorded; false leaves the text in place. */
@@ -23,6 +23,7 @@ type Props = {
  * brief is that a bookseller's input is never lost.
  */
 export function NoteComposer({ onSubmit, sending }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const [text, setText] = useState("");
   const [message, setMessage] = useState<string | undefined>(undefined);
 
@@ -92,10 +93,11 @@ export function NoteComposer({ onSubmit, sending }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  block: { gap: space.xs },
-  field: { backgroundColor: colors.surface },
-  footer: { alignItems: "center", flexDirection: "row", gap: space.sm },
-  helper: { flexShrink: 1, flexGrow: 1, minHeight: 24 },
-  submit: { justifyContent: "center", minHeight: 44 },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    block: { gap: space.xs },
+    field: { backgroundColor: colors.surface },
+    footer: { alignItems: "center", flexDirection: "row", gap: space.sm },
+    helper: { flexShrink: 1, flexGrow: 1, minHeight: 24 },
+    submit: { justifyContent: "center", minHeight: 44 },
+  });

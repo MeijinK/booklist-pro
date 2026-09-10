@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { LoadingArea, Skeleton } from "@/components/ui/Skeleton";
-import { colors, space } from "@/theme";
+import { space, useThemedStyles, type Palette } from "@/theme";
 
 type Props = { rows?: number };
 
@@ -12,6 +12,8 @@ type Props = { rows?: number };
  * arriving content contradicts.
  */
 export function NoteListSkeleton({ rows = 2 }: Props) {
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <LoadingArea label="Chargement des notes de lecture">
       {Array.from({ length: rows }, (_, index) => (
@@ -25,12 +27,13 @@ export function NoteListSkeleton({ rows = 2 }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    borderBottomColor: colors.border,
-    borderBottomWidth: 1,
-    gap: space.sm,
-    paddingBottom: space.md,
-    paddingTop: space.sm,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    row: {
+      borderBottomColor: colors.border,
+      borderBottomWidth: 1,
+      gap: space.sm,
+      paddingBottom: space.md,
+      paddingTop: space.sm,
+    },
+  });

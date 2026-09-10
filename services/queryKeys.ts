@@ -37,6 +37,9 @@ export const bookKeys = {
 
 /**
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> da0d07c (fix conflict and rebase properly for front to work)
  * Notes live under their book, and not in a root `['notes', id]`.
  *
  * The hierarchy is what makes `bookKeys.all` expire a record together with its
@@ -47,33 +50,9 @@ export const noteKeys = {
   all: (bookId: string) => [...bookKeys.detail(bookId), "notes"] as const,
 };
 
-/**
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> e095a3b (feat(services): reading notes routes and cache keys)
-=======
->>>>>>> e69f505 (typescript error)
- * Enrichment is keyed by title, not by book id: two records bearing the same
- * title share one answer, and a list page of twenty rows costs far fewer
- * lookups than it appears to.
- */
+
 export const enrichmentKeys = {
   all: ["enrichment"] as const,
   byTitle: (title: string) =>
     [...enrichmentKeys.all, title.trim().toLocaleLowerCase("fr-FR")] as const,
-<<<<<<< HEAD
 }
-=======
-=======
- * Notes live under their book, and not in a root `['notes', id]`.
- *
- * The hierarchy is what makes `bookKeys.all` expire a record together with its
- * notes: deleting a book must not leave its notes behind in the cache, ready to
- * be shown again the day another book reuses the screen.
- */
-export const noteKeys = {
-  all: (bookId: string) => [...bookKeys.detail(bookId), "notes"] as const,
->>>>>>> 29c5a60 (feat(services): reading notes routes and cache keys)
-};
->>>>>>> e69f505 (typescript error)

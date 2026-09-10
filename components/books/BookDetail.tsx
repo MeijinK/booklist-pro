@@ -20,7 +20,7 @@ type Props = {
  * form are raised as callbacks, so this component stays mountable as is in a
  * test, and the optimistic write keeps a single owner in features/books.
  */
-export function BookDetail({ book }: Props) {
+export function BookDetail({ book, onToggleRead, onToggleFavourite }: Props) {
   const styles = useThemedStyles(makeStyles);
 
   return (
