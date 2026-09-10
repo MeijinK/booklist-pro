@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Animated, Easing, StyleSheet, View, type DimensionValue } from "react-native";
 
-import { colors, radius } from "@/theme";
+import { radius, useThemedStyles, type Palette } from "@/theme";
 
 /** One full round trip of the pulse. */
 const PULSE_DURATION_MS = 1200;
@@ -22,6 +22,7 @@ type Props = {
  * way round.
  */
 export function Skeleton({ width = "100%", height = 14, block = false }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const opacity = useRef(new Animated.Value(0.5)).current;
 
   useEffect(() => {
@@ -70,6 +71,7 @@ export function LoadingArea({ children, label }: { children: React.ReactNode; la
   );
 }
 
-const styles = StyleSheet.create({
-  base: { backgroundColor: colors.surfaceActive },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    base: { backgroundColor: colors.surfaceActive },
+  });

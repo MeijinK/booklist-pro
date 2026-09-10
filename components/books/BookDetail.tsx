@@ -3,7 +3,7 @@ import { Chip, Divider, Text } from "react-native-paper";
 
 import { Cover } from "@/components/ui/Cover";
 import type { Book } from "@/domain";
-import { colors, radius, space } from "@/theme";
+import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
 type Props = { book: Book };
 
@@ -12,6 +12,8 @@ type Props = { book: Book };
  * only displays, which makes it mountable as is in a test.
  */
 export function BookDetail({ book }: Props) {
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <View style={styles.block}>
       <View style={styles.header}>
@@ -47,6 +49,8 @@ export function BookDetail({ book }: Props) {
 }
 
 function Row({ label, value }: { label: string; value: string }) {
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <View>
       <View style={styles.row}>
@@ -68,18 +72,19 @@ function readableDate(iso: string): string {
   return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 }
 
-const styles = StyleSheet.create({
-  block: { gap: space.xl, padding: space.lg },
-  header: { flexDirection: "row", gap: space.lg },
-  identity: { flexShrink: 1, gap: space.xs, justifyContent: "flex-start" },
-  badges: { flexDirection: "row", gap: space.sm, marginTop: space.sm },
-  fields: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  row: { gap: space.xxs, padding: space.md },
-  label: { color: colors.textMuted },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    block: { gap: space.xl, padding: space.lg },
+    header: { flexDirection: "row", gap: space.lg },
+    identity: { flexShrink: 1, gap: space.xs, justifyContent: "flex-start" },
+    badges: { flexDirection: "row", gap: space.sm, marginTop: space.sm },
+    fields: {
+      backgroundColor: colors.surface,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      overflow: "hidden",
+    },
+    row: { gap: space.xxs, padding: space.md },
+    label: { color: colors.textMuted },
+  });

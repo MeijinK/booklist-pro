@@ -1,10 +1,12 @@
 import { StyleSheet, View } from "react-native";
 
 import { LoadingArea, Skeleton } from "@/components/ui/Skeleton";
-import { colors, radius, space } from "@/theme";
+import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
 /** Skeleton of the book record, traced over the BookDetail layout. */
 export function BookDetailSkeleton() {
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <LoadingArea label="Chargement de la fiche">
       <View style={styles.block}>
@@ -30,20 +32,21 @@ export function BookDetailSkeleton() {
   );
 }
 
-const styles = StyleSheet.create({
-  block: { gap: space.xl, padding: space.lg },
-  header: { flexDirection: "row", gap: space.lg },
-  identity: { flexShrink: 1, gap: space.md, paddingTop: space.xs },
-  fields: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    borderWidth: 1,
-  },
-  row: {
-    borderBottomColor: colors.border,
-    borderBottomWidth: 1,
-    gap: space.sm,
-    padding: space.md,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    block: { gap: space.xl, padding: space.lg },
+    header: { flexDirection: "row", gap: space.lg },
+    identity: { flexShrink: 1, gap: space.md, paddingTop: space.xs },
+    fields: {
+      backgroundColor: colors.surface,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      borderWidth: 1,
+    },
+    row: {
+      borderBottomColor: colors.border,
+      borderBottomWidth: 1,
+      gap: space.sm,
+      padding: space.md,
+    },
+  });

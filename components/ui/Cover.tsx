@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 
 import { resolveCover, titleInitials } from "@/services/cover";
-import { colors, radius, space } from "@/theme";
+import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
   /** The `couverture` field as the server returned it. */
@@ -26,6 +26,7 @@ const SIZES = {
  * an image is missing.
  */
 export function Cover({ source, title, size = "row" }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const [failed, setFailed] = useState(false);
   const resolved = resolveCover(source, title);
   const dimensions = SIZES[size];
@@ -61,13 +62,14 @@ export function Cover({ source, title, size = "row" }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    backgroundColor: colors.surfaceSunken,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-  },
-  fallback: { alignItems: "center", justifyContent: "center", padding: space.xxs },
-  initials: { color: colors.textMuted },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    base: {
+      backgroundColor: colors.surfaceSunken,
+      borderColor: colors.border,
+      borderRadius: radius.sm,
+      borderWidth: 1,
+    },
+    fallback: { alignItems: "center", justifyContent: "center", padding: space.xxs },
+    initials: { color: colors.textMuted },
+  });
