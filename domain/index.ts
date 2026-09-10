@@ -3,8 +3,10 @@ export {
   BookSchema,
   MIN_PUBLICATION_YEAR,
   maxPublicationYear,
+  SaisieLivreSchema,
   type Book,
   type BookDraft,
+  type SaisieLivre,
 } from "./livre";
 
 export { NOTE_MAX_LENGTH, NoteSchema, type Note } from "./note";
