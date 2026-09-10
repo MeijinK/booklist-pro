@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 8081;
+// 8081 est le port du serveur de developpement Expo : le garder libre permet
+// de lancer la recette e2e sans arreter `npx expo start --web`.
+const PORT = 8082;
 const baseURL = `http://127.0.0.1:${PORT}`;
 
 /**
