@@ -9,6 +9,8 @@ export {
   type BookFormValues,
 } from "./book";
 
+export { NO_ENRICHMENT, type BookEnrichment } from "./enrichment";
+
 export { NOTE_MAX_LENGTH, NoteSchema, type Note } from "./note";
 
 export { DEFAULT_LIMIT, MAX_LIMIT, pageSchema, type Page } from "./page";
