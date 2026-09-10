@@ -2,7 +2,8 @@
 
 [![CI](https://github.com/MeijinK/booklist-pro/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MeijinK/booklist-pro/actions/workflows/ci.yml)
 
-Carnet de lecture pour libraires — application [Expo](https://docs.expo.dev/versions/v54.0.0/) / React Native.
+Carnet de lecture pour libraires — application [Expo](https://docs.expo.dev/versions/v54.0.0/) / React Native,
+interface [React Native Paper](https://callstack.github.io/react-native-paper/) thémée aux jetons du projet.
 **Cible n°1 : le navigateur** (aucun émulateur requis) ; iOS et Android tournent sur la même base.
 
 ## Démarrer (< 5 min)
@@ -46,11 +47,14 @@ npm run build:web
 npx playwright install chromium
 ```
 
-Playwright sert `dist/` sur le port 8081 tout seul (`webServer` dans `playwright.config.ts`).
+Playwright sert `dist/` sur le port **8082** tout seul (`webServer` dans `playwright.config.ts`) :
+le 8081 reste libre pour `npx expo start --web`, les deux peuvent donc tourner ensemble.
 
 ## Tests
 
-- **Unitaires / composants** — `components/__tests__/`, `hooks/__tests__/`, preset `jest-expo`, requêtes par rôle et par texte (jamais par structure DOM).
+- **Domaine et services** — `domain/__tests__/`, `services/__tests__/` : règles métier pures et résolution des couvertures, sans réseau.
+- **Composants** — `components/__tests__/`, preset `jest-expo`, requêtes par rôle et par texte (jamais par structure DOM).
+- **Hooks de données** — `features/books/__tests__/`, `fetch` simulé, pagination et erreurs discriminées.
 - **Bout en bout** — `e2e/`, un parcours critique dans un vrai navigateur sur le bundle réellement livré.
 
 ## Intégration continue
@@ -68,5 +72,6 @@ Les rapports de couverture et Playwright sont publiés en artefacts du run (7 jo
 
 ## Documentation
 
+- `PRODUCT.md` — utilisateurs, scène d'usage, principes et anti-références
 - `AGENTS.md` — règles d'architecture et contrat de qualité
 - `docs/ADR/`, `docs/ARCHITECTURE.md`, `docs/PERFORMANCE.md`, `IA.md`

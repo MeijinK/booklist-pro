@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-/** Limite imposee par le serveur sur le contenu d'une note de lecture. */
+/** Limit the server enforces on the content of a reading note. */
 export const NOTE_MAX_LENGTH = 1000;
 
-/** Forme d'une note telle que le serveur la renvoie. Structure seule. */
+/** Shape of a note as the server returns it. Structure only. */
 export const NoteSchema = z.object({
   id: z.string(),
   livreId: z.string(),

@@ -3,9 +3,9 @@ import { QueryClient } from "@tanstack/react-query";
 import type { ApiError } from "@/domain";
 
 /**
- * Declare ApiError comme type d'erreur par defaut de TanStack Query. Les hooks
- * exposent alors un `error` sur lequel l'interface peut discriminer `kind`,
- * sans avoir a le retyper a chaque appel.
+ * Declares ApiError as TanStack Query's default error type. Hooks then expose
+ * an `error` the interface can discriminate on `kind`, without having to retype
+ * it at every call site.
  */
 declare module "@tanstack/react-query" {
   interface Register {
@@ -14,23 +14,23 @@ declare module "@tanstack/react-query" {
 }
 
 /**
- * Fabrique plutot que singleton : chaque test obtient un cache neuf, et
- * l'application n'en cree qu'un seul, monte dans le layout racine.
+ * A factory rather than a singleton: each test gets a fresh cache, and the
+ * application creates only one, mounted in the root layout.
  */
 export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        // Le reessai vit dans le client HTTP, seul endroit qui sache quels
-        // statuts se rejouent. L'activer ici aussi multiplierait les
-        // tentatives et aggraverait une panne au lieu de l'absorber.
+        // Retrying lives in the HTTP client, the only place that knows which
+        // statuses are replayable. Enabling it here as well would multiply the
+        // attempts and worsen an outage instead of absorbing it.
         retry: false,
-        // Sans delai de peremption, chaque montage d'ecran refait une requete.
-        // A 1,5 s de latence en mode degrade, ca se voit immediatement.
+        // Without a staleness delay, every screen mount refires a request.
+        // At 1.5 s of latency in degraded mode, that shows immediately.
         staleTime: 30_000,
-        // Une erreur de donnees doit produire l'ecran d'erreur avec reessai
-        // exige au lot 1, pas remonter a l'ErrorBoundary global, reserve a
-        // l'inattendu.
+        // A data error must produce the error screen with retry required by
+        // batch 1, not bubble up to the global ErrorBoundary, which is reserved
+        // for the unexpected.
         throwOnError: false,
       },
       mutations: {

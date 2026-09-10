@@ -2,7 +2,7 @@ import type { z } from "zod";
 
 import { ApiError } from "@/domain";
 import { getBaseUrl, REQUEST_TIMEOUT_MS } from "@/services/config";
-import { toApiError } from "./erreurs";
+import { toApiError } from "./errors";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -10,23 +10,23 @@ export type RequestOptions = {
   method?: HttpMethod;
   body?: unknown;
   headers?: Record<string, string>;
-  /** Signal fourni par l'appelant, typiquement celui d'une requete TanStack Query. */
+  /** Signal supplied by the caller, typically a TanStack Query request's. */
   signal?: AbortSignal;
   timeoutMs?: number;
 };
 
 /**
- * Methodes qu'on peut rejouer sans creer de doublon. POST en est exclu : un 503
- * ne dit pas si le serveur a traite la creation avant d'echouer, et rejouer
- * produirait deux ouvrages. Au lot 4, la file de mutations portera un
- * identifiant client qui rendra POST /sync rejouable a son tour.
+ * Methods that can be replayed without creating a duplicate. POST is excluded:
+ * a 503 does not say whether the server processed the creation before failing,
+ * and replaying would produce two books. At batch 4, the mutation queue will
+ * carry a client identifier that makes POST /sync replayable in turn.
  */
 const IDEMPOTENT_METHODS: readonly HttpMethod[] = ["GET", "PUT", "PATCH", "DELETE"];
 
 const MAX_ATTEMPTS = 3;
 const BASE_RETRY_DELAY_MS = 300;
 
-/** Seuls une indisponibilite passagere et une requete jamais partie se rejouent. */
+/** Only a temporary outage and a request that never departed are replayed. */
 function isRetryable(error: ApiError): boolean {
   return (
     error.detail.kind === "network" &&
@@ -35,8 +35,8 @@ function isRetryable(error: ApiError): boolean {
 }
 
 /**
- * Temporisation croissante, avec gigue. Sans elle, dix clients qui reessaient
- * en cadence achevent un serveur deja en difficulte.
+ * Growing backoff, with jitter. Without it, ten clients retrying in lockstep
+ * finish off a server that is already struggling.
  */
 function retryDelay(attempt: number): number {
   const base = BASE_RETRY_DELAY_MS * 2 ** (attempt - 1);
@@ -58,11 +58,11 @@ function wait(ms: number, signal?: AbortSignal): Promise<void> {
 }
 
 /**
- * Un aller-retour reseau, borne dans le temps.
+ * One network round trip, bounded in time.
  *
- * Le delai d'expiration et l'annulation de l'appelant sont deux signaux
- * distincts relayes vers un meme controleur : `AbortSignal.any` n'est pas
- * disponible partout ou l'application doit tourner.
+ * The timeout and the caller's cancellation are two distinct signals relayed to
+ * a single controller: `AbortSignal.any` is not available everywhere the
+ * application has to run.
  */
 async function sendOnce(url: string, options: RequestOptions): Promise<Response> {
   const controller = new AbortController();
@@ -91,9 +91,9 @@ async function sendOnce(url: string, options: RequestOptions): Promise<Response>
       signal: controller.signal,
     });
   } catch (cause) {
-    // Annulation demandee par l'appelant : ce n'est pas une panne. On laisse
-    // remonter tel quel pour que TanStack Query y voie une requete annulee et
-    // n'affiche pas d'erreur a chaque frappe dans la barre de recherche.
+    // Cancellation requested by the caller: this is not a failure. Let it
+    // bubble up as is so TanStack Query sees a cancelled request and does not
+    // display an error on every keystroke in the search bar.
     if (options.signal?.aborted) throw cause;
 
     throw new ApiError({
@@ -108,7 +108,7 @@ async function sendOnce(url: string, options: RequestOptions): Promise<Response>
   }
 }
 
-/** Envoi, avec reessai temporise quand la methode et l'erreur s'y pretent. */
+/** Send, with timed retry when the method and the error allow it. */
 async function send(path: string, options: RequestOptions): Promise<Response> {
   const url = `${getBaseUrl()}${path}`;
   const maxAttempts = IDEMPOTENT_METHODS.includes(options.method ?? "GET") ? MAX_ATTEMPTS : 1;
@@ -132,10 +132,10 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
 }
 
 /**
- * Appel attendant un corps, valide contre son schema.
+ * A call expecting a body, validated against its schema.
  *
- * Le typage seul ne protege de rien : c'est `schema` qui garantit que ce qui
- * ressort d'ici correspond vraiment a ce qui est annonce.
+ * Typing alone protects nothing: `schema` is what guarantees that what comes
+ * out of here really matches what is announced.
  */
 export async function request<T extends z.ZodType>(
   path: string,
@@ -158,8 +158,8 @@ export async function request<T extends z.ZodType>(
       status: response.status,
       message: "Reponse inattendue du serveur.",
     });
-    // Le detail technique reste attache a l'erreur pour la remontee, sans
-    // jamais s'afficher au libraire.
+    // The technical detail stays attached to the error for reporting, without
+    // ever being shown to the bookseller.
     error.cause = parsed.error;
     throw error;
   }
@@ -167,7 +167,7 @@ export async function request<T extends z.ZodType>(
   return parsed.data;
 }
 
-/** Appel sans corps de reponse attendu, typiquement un 204. */
+/** Call with no expected response body, typically a 204. */
 export async function requestNoContent(path: string, options: RequestOptions): Promise<void> {
   await send(path, options);
 }

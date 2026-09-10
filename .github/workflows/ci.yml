@@ -86,7 +86,12 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: Build web statique
+        # Sans .env (jamais versionne), EXPO_PUBLIC_API_URL est absente et
+        # getBaseUrl() jette : l'export statique reste bloque sur "Chargement".
+        # L'URL n'est jamais appelee, le reseau etant simule par Playwright.
         run: npm run build:web
+        env:
+          EXPO_PUBLIC_API_URL: http://127.0.0.1:3000
 
       - run: npm run test:e2e
 
