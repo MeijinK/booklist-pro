@@ -10,7 +10,10 @@ export { NO_ENRICHMENT, type BookEnrichment } from "./enrichment";
 
 export {
   NOTE_COUNTER_THRESHOLD,
+<<<<<<< HEAD
   NOTE_MAX_LENGTH,
+=======
+>>>>>>> ebafecc (feat(domain): note validation rules and sort criteria)
   NoteDraftSchema,
   NoteSchema,
   sortNotes,
