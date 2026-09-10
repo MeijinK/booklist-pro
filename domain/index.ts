@@ -1,13 +1,13 @@
 export {
   BookDraftSchema,
+  BookFormSchema,
   BookSchema,
   MIN_PUBLICATION_YEAR,
   maxPublicationYear,
-  SaisieLivreSchema,
   type Book,
   type BookDraft,
-  type SaisieLivre,
-} from "./livre";
+  type BookFormValues,
+} from "./book";
 
 export { NOTE_MAX_LENGTH, NoteSchema, type Note } from "./note";
 
@@ -25,7 +25,7 @@ export {
   type NetworkError,
   type NotFoundError,
   type ValidationError,
-} from "./erreurs";
+} from "./errors";
 
 export {
   DEFAULT_FILTERS,
@@ -37,4 +37,4 @@ export {
   type ReadStatus,
   type SortField,
   type SortOrder,
-} from "./filtres";
+} from "./filters";

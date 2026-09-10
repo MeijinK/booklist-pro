@@ -1,88 +1,88 @@
 import { Platform } from "react-native";
 import { configureFonts, MD3LightTheme, type MD3Theme } from "react-native-paper";
 
-import { couleurs } from "./couleurs";
+import { colors } from "./colors";
 
 /**
- * Une seule famille, celle du systeme : l'application vit sur des postes de
- * caisse heterogenes, et une police chargee au demarrage retarde le premier
- * affichage sans rien apporter a un outil de saisie.
+ * A single family, the system one: the application runs on heterogeneous till
+ * workstations, and a font loaded at startup delays the first paint without
+ * bringing anything to a data-entry tool.
  */
-export const FAMILLE = Platform.select({
+export const FONT_FAMILY = Platform.select({
   web: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
   ios: "system-ui",
   default: "sans-serif",
 });
 
 /**
- * Traduction de nos jetons dans le vocabulaire Material 3 attendu par
- * React Native Paper.
+ * Translation of our tokens into the Material 3 vocabulary React Native Paper
+ * expects.
  *
- * Le theme est le seul point de contact entre la palette du projet et la
- * librairie : un composant qui irait chercher `couleurs.accent` a la main
- * reintroduirait deux sources de verite, et le jour ou la palette bouge, l'une
- * des deux serait oubliee.
+ * The theme is the only contact point between the project palette and the
+ * library: a component reaching for `colors.accent` by hand would reintroduce
+ * two sources of truth, and the day the palette moves, one of the two would be
+ * forgotten.
  *
- * Le mode clair est le seul declare : la scene d'usage (poste de caisse devant
- * une vitrine ensoleillee) tranche, et un theme sombre non teste ferait pire
- * que pas de theme sombre du tout.
+ * Light mode is the only one declared: the usage scene (a till workstation in
+ * front of a sunlit shop window) settles it, and an untested dark theme would
+ * be worse than no dark theme at all.
  */
-export const themePaper: MD3Theme = {
+export const paperTheme: MD3Theme = {
   ...MD3LightTheme,
-  // Les coins Material par defaut sont plus ronds que notre echelle : un rayon
-  // unique aligne boutons, champs et dialogues sur la meme geometrie.
+  // Material's default corners are rounder than our scale: a single radius
+  // aligns buttons, fields and dialogs on the same geometry.
   roundness: 2,
-  fonts: configureFonts({ config: { fontFamily: FAMILLE } }),
+  fonts: configureFonts({ config: { fontFamily: FONT_FAMILY } }),
   colors: {
     ...MD3LightTheme.colors,
 
-    primary: couleurs.accent,
-    onPrimary: couleurs.texteInverse,
-    primaryContainer: couleurs.accentFond,
-    onPrimaryContainer: couleurs.accentAppuye,
+    primary: colors.accent,
+    onPrimary: colors.textInverse,
+    primaryContainer: colors.accentBackground,
+    onPrimaryContainer: colors.accentPressed,
 
-    secondary: couleurs.texte,
-    onSecondary: couleurs.texteInverse,
-    secondaryContainer: couleurs.surfaceCreuse,
-    onSecondaryContainer: couleurs.texteFort,
+    secondary: colors.text,
+    onSecondary: colors.textInverse,
+    secondaryContainer: colors.surfaceSunken,
+    onSecondaryContainer: colors.textStrong,
 
-    tertiary: couleurs.accent,
-    onTertiary: couleurs.texteInverse,
-    tertiaryContainer: couleurs.accentFond,
-    onTertiaryContainer: couleurs.accentAppuye,
+    tertiary: colors.accent,
+    onTertiary: colors.textInverse,
+    tertiaryContainer: colors.accentBackground,
+    onTertiaryContainer: colors.accentPressed,
 
-    error: couleurs.destructif,
-    onError: couleurs.texteInverse,
-    errorContainer: couleurs.destructifFond,
-    onErrorContainer: couleurs.destructifAppuye,
+    error: colors.destructive,
+    onError: colors.textInverse,
+    errorContainer: colors.destructiveBackground,
+    onErrorContainer: colors.destructivePressed,
 
-    background: couleurs.fond,
-    onBackground: couleurs.texte,
-    surface: couleurs.surface,
-    onSurface: couleurs.texteFort,
-    surfaceVariant: couleurs.surfaceCreuse,
-    onSurfaceVariant: couleurs.texteFaible,
+    background: colors.background,
+    onBackground: colors.text,
+    surface: colors.surface,
+    onSurface: colors.textStrong,
+    surfaceVariant: colors.surfaceSunken,
+    onSurfaceVariant: colors.textMuted,
 
-    outline: couleurs.bordureFerme,
-    outlineVariant: couleurs.bordure,
+    outline: colors.borderStrong,
+    outlineVariant: colors.border,
 
-    inverseSurface: couleurs.inverse,
-    inverseOnSurface: couleurs.texteInverse,
-    inversePrimary: couleurs.accentBordure,
+    inverseSurface: colors.inverse,
+    inverseOnSurface: colors.textInverse,
+    inversePrimary: colors.accentBorder,
 
-    surfaceDisabled: couleurs.surfaceCreuse,
-    onSurfaceDisabled: couleurs.texteFaible,
+    surfaceDisabled: colors.surfaceSunken,
+    onSurfaceDisabled: colors.textMuted,
     backdrop: "rgba(47, 49, 64, 0.45)",
 
-    // Material teinte les surfaces selon leur elevation. Nos surfaces sont
-    // plates : on neutralise la teinte plutot que de la subir a moitie.
+    // Material tints surfaces according to their elevation. Ours are flat: we
+    // neutralise the tint rather than suffer it halfway.
     elevation: {
       level0: "transparent",
-      level1: couleurs.surface,
-      level2: couleurs.surface,
-      level3: couleurs.surfaceCreuse,
-      level4: couleurs.surfaceCreuse,
-      level5: couleurs.surfaceActive,
+      level1: colors.surface,
+      level2: colors.surface,
+      level3: colors.surfaceSunken,
+      level4: colors.surfaceSunken,
+      level5: colors.surfaceActive,
     },
   },
 };

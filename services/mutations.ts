@@ -1,30 +1,29 @@
 /**
- * Ecritures a depart differe.
+ * Writes with a deferred departure.
  *
- * Le lot 1 exige qu'une suppression puisse etre annulee pendant cinq secondes.
- * On ne peut pas supprimer puis recreer : la recreation donnerait un nouvel
- * identifiant, perdrait les notes rattachees et repartirait de la version 1.
- * La seule annulation possible consiste donc a ne pas encore avoir supprime.
+ * Batch 1 requires that a deletion can be undone for five seconds. Deleting
+ * then recreating is not an option: the recreation would yield a new
+ * identifier, lose the attached notes and restart from version 1. The only
+ * possible undo therefore consists of not having deleted yet.
  *
- * Les operations en attente vivent ici, au niveau du module, et non dans un
- * effet React : si le libraire quitte l'ecran pendant le delai, un minuteur
- * porte par le composant serait detruit avec lui et la suppression ne partirait
- * jamais, sans que personne ne le sache.
+ * Pending operations live here, at module level, and not in a React effect: if
+ * the bookseller leaves the screen during the delay, a timer owned by the
+ * component would be destroyed with it and the deletion would never depart,
+ * without anyone knowing.
  *
- * Limite assumee au lot 1 : un rechargement complet de la page perd les
- * operations en attente. C'est la persistance de la file du lot 4 qui reglera
- * ce cas.
+ * Accepted limit at batch 1: a full page reload loses the pending operations.
+ * Batch 4's persistent queue is what will settle that case.
  */
 
-/** Delai laisse au libraire pour se raviser. */
+/** Grace period left to the bookseller to change their mind. */
 export const UNDO_DELAY_MS = 5000;
 
 export type DeferredMutation = {
-  /** Identifie l'operation ; pour une suppression, l'identifiant de l'ouvrage. */
+  /** Identifies the operation; for a deletion, the book identifier. */
   key: string;
   delayMs?: number;
   run: () => Promise<void>;
-  /** Appele une fois l'operation partie, avec l'erreur si elle a echoue. */
+  /** Called once the operation has departed, with the error if it failed. */
   onSettled?: (error?: unknown) => void;
 };
 
@@ -36,8 +35,8 @@ type Pending = {
 const pending = new Map<string, Pending>();
 
 /**
- * Programme une operation. Une operation deja en attente sur la meme cle est
- * annulee : deux suppressions du meme ouvrage n'ont pas de sens.
+ * Schedules an operation. An operation already pending on the same key is
+ * cancelled: two deletions of the same book make no sense.
  */
 export function schedule(mutation: DeferredMutation): void {
   cancel(mutation.key);
@@ -64,7 +63,7 @@ async function execute(key: string): Promise<void> {
   }
 }
 
-/** Annule avant le depart. Rend false si l'operation etait deja partie. */
+/** Cancels before departure. Returns false if the operation had already left. */
 export function cancel(key: string): boolean {
   const entry = pending.get(key);
   if (entry === undefined) return false;

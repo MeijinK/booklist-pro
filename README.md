@@ -54,7 +54,7 @@ le 8081 reste libre pour `npx expo start --web`, les deux peuvent donc tourner e
 
 - **Domaine et services** — `domain/__tests__/`, `services/__tests__/` : règles métier pures et résolution des couvertures, sans réseau.
 - **Composants** — `components/__tests__/`, preset `jest-expo`, requêtes par rôle et par texte (jamais par structure DOM).
-- **Hooks de données** — `features/livres/__tests__/`, `fetch` simulé, pagination et erreurs discriminées.
+- **Hooks de données** — `features/books/__tests__/`, `fetch` simulé, pagination et erreurs discriminées.
 - **Bout en bout** — `e2e/`, un parcours critique dans un vrai navigateur sur le bundle réellement livré.
 
 ## Intégration continue

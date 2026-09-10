@@ -1,9 +1,9 @@
 import { normalizeFilters, type BookFilters } from "@/domain";
 
 /**
- * La page n'entre pas dans la cle : avec useInfiniteQuery elle est le
- * `pageParam`, pas un discriminant de cache. L'y laisser ferait de chaque page
- * une entree independante, et le defilement infini ne fonctionnerait pas.
+ * The page does not enter the key: with useInfiniteQuery it is the `pageParam`,
+ * not a cache discriminant. Leaving it in would make every page an independent
+ * entry, and infinite scrolling would not work.
  */
 function toCacheKey(filters: BookFilters): Omit<BookFilters, "page"> {
   const normalized = normalizeFilters(filters);
@@ -20,12 +20,12 @@ function toCacheKey(filters: BookFilters): Omit<BookFilters, "page"> {
 }
 
 /**
- * Fabrique unique des cles de cache : elles ne s'ecrivent jamais a la main
- * dans un hook.
+ * The single factory for cache keys: they are never written by hand inside a
+ * hook.
  *
- * La hierarchie porte l'invalidation. `lists()` perime toutes les listes, quels
- * que soient les filtres, sans toucher aux fiches deja chargees — ce qu'une
- * cle plate ne permettrait pas.
+ * The hierarchy carries invalidation. `lists()` expires every list, whatever
+ * the filters, without touching records already loaded — something a flat key
+ * would not allow.
  */
 export const bookKeys = {
   all: ["books"] as const,

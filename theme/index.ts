@@ -1,3 +1,3 @@
-export { couleurs } from "./couleurs";
-export { espace, LARGEUR_TEXTE_MAX, rayon } from "./espacement";
-export { FAMILLE, themePaper } from "./paper";
+export { colors } from "./colors";
+export { MAX_TEXT_WIDTH, radius, space } from "./spacing";
+export { FONT_FAMILY, paperTheme } from "./paper";

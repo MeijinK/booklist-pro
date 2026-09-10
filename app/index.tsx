@@ -2,35 +2,35 @@ import { Stack, useRouter } from "expo-router";
 
 import { Button } from "react-native-paper";
 
-import { ListeDuFonds } from "@/features/livres/ListeDuFonds";
+import { BookList } from "@/features/books/BookList";
 
 /**
- * Ecran du fonds. Il ne fait que cabler la navigation : la liste, ses etats et
- * sa pagination vivent dans features/livres.
+ * Collection screen. It only wires up navigation: the list, its states and its
+ * pagination live in features/books.
  */
-export default function EcranFonds() {
+export default function BookListScreen() {
   const router = useRouter();
-  const creer = () => router.push("/livres/nouveau");
+  const create = () => router.push("/books/new");
 
   return (
     <>
-      {/* L'ajout reste atteignable quel que soit l'etat de la liste : l'action
-          proposee dans l'etat vide disparait des qu'un ouvrage existe. */}
+      {/* Adding stays reachable whatever the state of the list: the action
+          offered in the empty state disappears as soon as a book exists. */}
       <Stack.Screen
         options={{
           headerRight: () => (
-            // Sans libelle explicite, le glyphe de l'icone entre dans le nom
-            // accessible du bouton et se fait lire a voix haute.
-            <Button accessibilityLabel="Ajouter" mode="text" icon="plus" onPress={creer}>
+            // Without an explicit label, the icon glyph ends up in the button's
+            // accessible name and gets read out loud.
+            <Button accessibilityLabel="Ajouter" mode="text" icon="plus" onPress={create}>
               Ajouter
             </Button>
           ),
         }}
       />
 
-      <ListeDuFonds
-        onOuvrir={(id) => router.push({ pathname: "/livres/[id]", params: { id } })}
-        onCreer={creer}
+      <BookList
+        onOpen={(id) => router.push({ pathname: "/books/[id]", params: { id } })}
+        onCreate={create}
       />
     </>
   );

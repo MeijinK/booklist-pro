@@ -6,53 +6,52 @@ import { useState } from "react";
 import { PaperProvider } from "react-native-paper";
 import type { Settings } from "react-native-paper/lib/typescript/core/settings";
 
-import { LimiteErreur } from "@/components/ui/LimiteErreur";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { createQueryClient } from "@/services/queryClient";
-import { couleurs, themePaper } from "@/theme";
+import { colors, paperTheme } from "@/theme";
 
 export const unstable_settings = { anchor: "index" };
 
 /**
- * Paper attend un rendu d'icone : `react-native-vector-icons` n'est pas installe
- * sous Expo, ou les memes glyphes arrivent par `@expo/vector-icons`.
+ * Paper expects an icon renderer: `react-native-vector-icons` is not installed
+ * under Expo, where the same glyphs come from `@expo/vector-icons`.
  */
-const reglagesPaper: Settings = {
+const paperSettings: Settings = {
   icon: ({ name, color, size }) => (
     <MaterialCommunityIcons
       name={name as keyof typeof MaterialCommunityIcons.glyphMap}
-      color={color ?? couleurs.texte}
+      color={color ?? colors.text}
       size={size}
     />
   ),
 };
 
 export default function RootLayout() {
-  // Cree une seule fois pour la duree de vie de l'application : un client
-  // reconstruit a chaque rendu perdrait le cache et relancerait toutes les
-  // requetes.
+  // Created once for the lifetime of the application: a client rebuilt on every
+  // render would lose the cache and refire every request.
   const [queryClient] = useState(createQueryClient);
 
   return (
-    <LimiteErreur>
-      <PaperProvider theme={themePaper} settings={reglagesPaper}>
+    <ErrorBoundary>
+      <PaperProvider theme={paperTheme} settings={paperSettings}>
         <QueryClientProvider client={queryClient}>
           <Stack
             screenOptions={{
-              headerStyle: { backgroundColor: couleurs.surfaceCreuse },
-              headerTintColor: couleurs.accent,
-              headerTitleStyle: { ...themePaper.fonts.titleMedium, color: couleurs.texteFort },
+              headerStyle: { backgroundColor: colors.surfaceSunken },
+              headerTintColor: colors.accent,
+              headerTitleStyle: { ...paperTheme.fonts.titleMedium, color: colors.textStrong },
               headerShadowVisible: false,
-              contentStyle: { backgroundColor: couleurs.fond },
+              contentStyle: { backgroundColor: colors.background },
             }}
           >
             <Stack.Screen name="index" options={{ title: "Le fonds" }} />
-            <Stack.Screen name="livres/nouveau" options={{ title: "Nouvel ouvrage" }} />
-            <Stack.Screen name="livres/[id]/index" options={{ title: "Fiche" }} />
-            <Stack.Screen name="livres/[id]/modifier" options={{ title: "Corriger la fiche" }} />
+            <Stack.Screen name="books/new" options={{ title: "Nouvel ouvrage" }} />
+            <Stack.Screen name="books/[id]/index" options={{ title: "Fiche" }} />
+            <Stack.Screen name="books/[id]/edit" options={{ title: "Corriger la fiche" }} />
           </Stack>
           <StatusBar style="dark" />
         </QueryClientProvider>
       </PaperProvider>
-    </LimiteErreur>
+    </ErrorBoundary>
   );
 }

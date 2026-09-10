@@ -1,27 +1,27 @@
 import { resolveBaseUrl } from "@/services/config";
 
 describe("resolveBaseUrl", () => {
-  it("accepte une URL absolue sans barre oblique finale", () => {
+  it("accepts an absolute URL without a trailing slash", () => {
     expect(resolveBaseUrl("http://localhost:3000")).toBe("http://localhost:3000");
   });
 
-  it("ignore les espaces autour de la valeur", () => {
+  it("ignores whitespace around the value", () => {
     expect(resolveBaseUrl("  http://localhost:3000  ")).toBe("http://localhost:3000");
   });
 
-  it("dit quoi faire quand la variable est absente", () => {
+  it("says what to do when the variable is missing", () => {
     expect(() => resolveBaseUrl(undefined)).toThrow(/Copiez \.env\.example/);
   });
 
-  it("traite une valeur vide comme une variable absente", () => {
+  it("treats an empty value as a missing variable", () => {
     expect(() => resolveBaseUrl("   ")).toThrow(/EXPO_PUBLIC_API_URL est absente/);
   });
 
-  it("refuse une valeur qui n'est pas une URL absolue", () => {
+  it("rejects a value that is not an absolute URL", () => {
     expect(() => resolveBaseUrl("localhost:3000")).toThrow(/URL absolue/);
   });
 
-  it("refuse une barre oblique finale, qui produirait des chemins doubles", () => {
+  it("rejects a trailing slash, which would produce doubled paths", () => {
     expect(() => resolveBaseUrl("http://localhost:3000/")).toThrow(/barre oblique/);
   });
 });

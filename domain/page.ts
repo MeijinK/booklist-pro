@@ -1,14 +1,14 @@
 import { z } from "zod";
 
-/** Valeurs de `limit` acceptees par GET /books ; le serveur plafonne au-dela. */
+/** `limit` values accepted by GET /books; the server caps anything beyond. */
 export const DEFAULT_LIMIT = 20;
 export const MAX_LIMIT = 100;
 
 /**
- * Enveloppe paginee renvoyee par GET /books.
+ * Paginated envelope returned by GET /books.
  *
- * Fabrique plutot que schema fige : les notes de lecture du lot 2 seront
- * paginees de la meme facon, avec un autre type d'element.
+ * A factory rather than a frozen schema: batch 2's reading notes will be
+ * paginated the same way, with a different item type.
  */
 export function pageSchema<T extends z.ZodType>(itemSchema: T) {
   return z.object({
