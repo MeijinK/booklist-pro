@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { Button, HelperText, TextInput } from "react-native-paper";
 
 import { NOTE_COUNTER_THRESHOLD, NOTE_MAX_LENGTH, NoteDraftSchema } from "@/domain";
+import { useBrouillon } from "@/features/sync/useBrouillon";
 import { useTranslation } from "@/i18n";
 import { space, useThemedStyles, type Palette } from "@/theme";
 
@@ -10,6 +11,13 @@ type Props = {
   /** Answers true once the note is recorded; false leaves the text in place. */
   onSubmit: (contenu: string) => Promise<boolean>;
   sending: boolean;
+  /** When given, the text survives a reload under this key until it is sent. */
+  brouillonCle?: string;
+};
+
+type ControleProps = Props & {
+  initial: string;
+  onChange: (texte: string) => void;
 };
 
 /**
@@ -23,10 +31,36 @@ type Props = {
  * leaves it where it was, ready to be sent again, because rule no. 1 of the
  * brief is that a bookseller's input is never lost.
  */
-export function NoteComposer({ onSubmit, sending }: Props) {
+export function NoteComposer(props: Props) {
+  if (props.brouillonCle === undefined) {
+    return <NoteComposerControle {...props} initial="" onChange={() => undefined} />;
+  }
+  return <NoteComposerBrouillon {...props} brouillonCle={props.brouillonCle} />;
+}
+
+/** Waits for the stored draft before mounting the field, so it opens filled. */
+function NoteComposerBrouillon({ brouillonCle, onSubmit, ...rest }: Props & { brouillonCle: string }) {
+  const brouillon = useBrouillon(brouillonCle);
+  if (brouillon.valeur === undefined) return null;
+
+  return (
+    <NoteComposerControle
+      {...rest}
+      initial={brouillon.valeur}
+      onChange={brouillon.ecrire}
+      onSubmit={async (contenu) => {
+        const accepted = await onSubmit(contenu);
+        if (accepted) await brouillon.effacer();
+        return accepted;
+      }}
+    />
+  );
+}
+
+function NoteComposerControle({ onSubmit, sending, initial, onChange }: ControleProps) {
   const styles = useThemedStyles(makeStyles);
   const { t, plural } = useTranslation();
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initial);
   const [message, setMessage] = useState<string | undefined>(undefined);
 
   const remaining = NOTE_MAX_LENGTH - text.length;
@@ -58,6 +92,7 @@ export function NoteComposer({ onSubmit, sending }: Props) {
         numberOfLines={3}
         onChangeText={(value) => {
           setText(value);
+          onChange(value);
           if (message !== undefined) setMessage(undefined);
         }}
         style={styles.field}

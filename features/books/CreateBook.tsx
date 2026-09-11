@@ -14,6 +14,7 @@ export function CreateBook({ onSaved, onCancel }: Props) {
   const { form, submit } = useBookForm({
     save: (draft) => create.mutateAsync(draft),
     onSaved,
+    brouillonCle: "livre:new",
   });
 
   return (

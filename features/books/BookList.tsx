@@ -8,14 +8,14 @@ import { BookRow } from "@/components/books/BookRow";
 import { BookToolbar } from "@/components/books/BookToolbar";
 import { ListFooter } from "@/components/books/ListFooter";
 import { ErrorState } from "@/components/ui/ErrorState";
-import { Notice } from "@/components/ui/Notice";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { DEFAULT_LIMIT, type Book } from "@/domain";
-import { useTranslation } from "@/i18n";
+import { useSync } from "@/features/sync/useSync";
 import { useThemedStyles, type Palette } from "@/theme";
 
 import { isNarrowed, useBookQuery } from "./useBookQuery";
 import { useBooks } from "./useBooks";
-import { toggleRefusalKey, useToggleBook } from "./useToggleBook";
+import { useToggleBook } from "./useToggleBook";
 
 type Props = {
   onOpen: (id: string) => void;
@@ -40,7 +40,7 @@ export function BookList({ onOpen, onCreate, readOnly = false }: Props) {
   const query = useBooks(criteria.filters);
   const toggle = useToggleBook();
   const styles = useThemedStyles(makeStyles);
-  const { t } = useTranslation();
+  const { enLigne } = useSync();
 
   const books = useMemo(
     () => query.data?.pages.flatMap((page) => page.items) ?? [],
@@ -102,9 +102,14 @@ export function BookList({ onOpen, onCreate, readOnly = false }: Props) {
       ) : null}
 
       {/* An error that occurs while data is already displayed does not erase it:
-          the bookseller keeps consulting what they have. */}
+          the bookseller keeps consulting what they have. Offline, it is not
+          even an error: the cache is doing its job. */}
       {query.isError && books.length > 0 ? (
-        <ErrorState banner error={query.error} onRetry={() => void query.refetch()} />
+        enLigne ? (
+          <ErrorState banner error={query.error} onRetry={() => void query.refetch()} />
+        ) : (
+          <OfflineBanner visible />
+        )
       ) : null}
 
       {query.isSuccess && books.length === 0 ? (
@@ -136,12 +141,6 @@ export function BookList({ onOpen, onCreate, readOnly = false }: Props) {
         />
       ) : null}
 
-      {toggle.isError && toggle.variables !== undefined ? (
-        <Notice
-          message={t("toggle.refused", { action: t(toggleRefusalKey(toggle.variables.changes)) })}
-          onDismiss={toggle.reset}
-        />
-      ) : null}
     </View>
   );
 }

@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 
 import { NoteComposer } from "@/components/notes/NoteComposer";
@@ -83,5 +84,15 @@ describe("NoteComposer", () => {
     renderComposer(jest.fn(), true);
 
     expect(screen.getByLabelText(FIELD).props.editable).toBe(false);
+  });
+
+  it("restores the draft left on this workstation", async () => {
+    await AsyncStorage.setItem("booklist.brouillon.note:l-1", "Deja tape");
+    renderWithTheme(
+      <NoteComposer brouillonCle="note:l-1" onSubmit={jest.fn()} sending={false} />,
+    );
+
+    await waitFor(() => expect(screen.getByLabelText(FIELD).props.value).toBe("Deja tape"));
+    await AsyncStorage.clear();
   });
 });
