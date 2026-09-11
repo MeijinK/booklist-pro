@@ -51,3 +51,7 @@ export const enrichmentKeys = {
   byTitle: (title: string) =>
     [...enrichmentKeys.all, title.trim().toLocaleLowerCase("fr-FR")] as const,
 };
+
+export const statsKeys = {
+  all: ["stats"] as const,
+};
