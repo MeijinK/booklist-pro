@@ -1,5 +1,5 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useMemo, useState } from "react";
@@ -9,6 +9,7 @@ import type { Settings } from "react-native-paper/lib/typescript/core/settings";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { SessionProvider } from "@/features/session";
 import { I18nProvider } from "@/i18n";
+import { optionsPersistance } from "@/services/cachePersistant";
 import { createQueryClient } from "@/services/queryClient";
 import { paperTheme, ThemeProvider, useAppTheme } from "@/theme";
 
@@ -61,6 +62,8 @@ export default function RootLayout() {
   // Created once for the lifetime of the application: a client rebuilt on every
   // render would lose the cache and refire every request.
   const [queryClient] = useState(createQueryClient);
+  // Built once with the client: the persister opens the storage on creation.
+  const [persistOptions] = useState(optionsPersistance);
 
   return (
     // The boundary stays outermost, and therefore outside the theme: it must
@@ -71,11 +74,11 @@ export default function RootLayout() {
           wording, and they render before any session exists. */}
       <I18nProvider>
         <ThemeProvider>
-          <QueryClientProvider client={queryClient}>
+          <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
             <SessionProvider>
               <ThemedApp />
             </SessionProvider>
-          </QueryClientProvider>
+          </PersistQueryClientProvider>
         </ThemeProvider>
       </I18nProvider>
     </ErrorBoundary>
