@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { Banner, Button, Text } from "react-native-paper";
 
 import { errorMessage } from "@/features/errors/messages";
+import { useTranslation } from "@/i18n";
 import { space } from "@/theme";
 
 type Props = {
@@ -18,14 +19,19 @@ type Props = {
  * after a 422 or a 404 promises a repair that will not come.
  */
 export function ErrorState({ error, onRetry, banner = false }: Props) {
-  const { title, detail, retryable } = errorMessage(error);
-  const canRetry = retryable && onRetry !== undefined;
+  const { t } = useTranslation();
+  const message = errorMessage(error);
+  const canRetry = message.retryable && onRetry !== undefined;
+
+  const title = t(message.titleKey);
+  // A validation refusal is worded by the server, and is shown as received.
+  const detail = "key" in message.detail ? t(message.detail.key) : message.detail.text;
 
   if (banner) {
     return (
       <Banner
         visible
-        actions={canRetry ? [{ label: "Reessayer", onPress: onRetry }] : []}
+        actions={canRetry ? [{ label: t("error.retry"), onPress: onRetry }] : []}
         icon="alert-circle-outline"
       >
         {`${title}. ${detail}`}
@@ -42,13 +48,13 @@ export function ErrorState({ error, onRetry, banner = false }: Props) {
 
       {canRetry ? (
         <Button
-          accessibilityLabel="Reessayer"
+          accessibilityLabel={t("error.retry")}
           mode="contained-tonal"
           icon="refresh"
           onPress={onRetry}
           style={styles.button}
         >
-          Reessayer
+          {t("error.retry")}
         </Button>
       ) : null}
     </View>

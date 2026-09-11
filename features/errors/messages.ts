@@ -1,23 +1,31 @@
 import { ApiError, type ApiErrorDetail, type AuthCode } from "@/domain";
+import type { MessageKey } from "@/i18n";
 
 /**
- * Translates an application error into a displayable message.
+ * Translates an application error into what to display.
  *
  * The brief requires 422 and 503 not to look alike on screen: one is fixed, the
  * other is waited out. The `kind` discriminant carries that difference, and
  * this function makes it visible to the bookseller.
+ *
+ * It returns catalogue keys rather than sentences: a plain function has no
+ * access to the language, and hard-coding French here would put half the error
+ * screens outside the bilingual interface.
  */
 
+/** The server supplies its own wording for a refusal; it is shown as received. */
+export type ErrorDetail = { key: MessageKey } | { text: string };
+
 export type ErrorMessage = {
-  title: string;
-  detail: string;
+  titleKey: MessageKey;
+  detail: ErrorDetail;
   /** False when retrying can change nothing: the button is then not offered. */
   retryable: boolean;
 };
 
 const UNEXPECTED: ErrorMessage = {
-  title: "Une erreur inattendue s'est produite",
-  detail: "Reessayez ; si le probleme persiste, prevenez votre responsable reseau.",
+  titleKey: "error.unexpected.title",
+  detail: { key: "error.unexpected.detail" },
   retryable: true,
 };
 
@@ -31,28 +39,27 @@ function fromDetail(detail: ApiErrorDetail): ErrorMessage {
     case "network":
       return detail.status === undefined
         ? {
-            title: "Le serveur ne repond pas",
-            detail: "Verifiez la connexion de la boutique, puis reessayez.",
+            titleKey: "error.offline.title",
+            detail: { key: "error.offline.detail" },
             retryable: true,
           }
         : {
-            title: "Le service est momentanement indisponible",
-            detail:
-              "Le serveur a repondu, mais pas ce qui etait attendu. Reessayez dans un instant.",
+            titleKey: "error.unavailable.title",
+            detail: { key: "error.unavailable.detail" },
             retryable: true,
           };
 
     case "validation":
       return {
-        title: "La saisie a ete refusee",
-        detail: detail.message,
+        titleKey: "error.validation.title",
+        detail: { text: detail.message },
         retryable: false,
       };
 
     case "conflict":
       return {
-        title: "La fiche a ete modifiee entre temps",
-        detail: "Un collegue l'a enregistree avant vous. Rechargez-la avant de la corriger.",
+        titleKey: "error.conflict.title",
+        detail: { key: "error.conflict.detail" },
         retryable: true,
       };
 
@@ -61,8 +68,8 @@ function fromDetail(detail: ApiErrorDetail): ErrorMessage {
 
     case "notFound":
       return {
-        title: "Cette fiche n'existe plus",
-        detail: "Elle a sans doute ete supprimee depuis un autre poste.",
+        titleKey: "error.notfound.title",
+        detail: { key: "error.notfound.detail" },
         retryable: false,
       };
   }
@@ -77,21 +84,20 @@ function authMessage(code: AuthCode): ErrorMessage {
   switch (code) {
     case "droits_insuffisants":
       return {
-        title: "Action reservee aux libraires titulaires",
-        detail:
-          "Votre compte est en lecture seule. Demandez a un titulaire d'effectuer cette modification.",
+        titleKey: "error.forbidden.title",
+        detail: { key: "error.forbidden.detail" },
         retryable: false,
       };
     case "identifiants_invalides":
       return {
-        title: "Connexion refusee",
-        detail: "Email ou mot de passe incorrect.",
+        titleKey: "error.credentials.title",
+        detail: { key: "error.credentials.detail" },
         retryable: false,
       };
     default:
       return {
-        title: "Votre session n'est plus valide",
-        detail: "Reconnectez-vous pour continuer.",
+        titleKey: "error.session.title",
+        detail: { key: "error.session.detail" },
         retryable: false,
       };
   }

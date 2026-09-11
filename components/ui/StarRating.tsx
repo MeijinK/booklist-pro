@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { Button, IconButton } from "react-native-paper";
 
+import { useTranslation } from "@/i18n";
 import { space, useAppTheme } from "@/theme";
 
 /** The scale the API accepts. */
@@ -31,12 +32,18 @@ type Props = {
  */
 export function StarRating({ value, onChange, disabled = false }: Props) {
   const { colors } = useAppTheme();
+  const { t } = useTranslation();
   const stars = Array.from({ length: MAX_RATING }, (_, index) => index + 1);
+
+  const spoken =
+    value === null
+      ? t("rating.unrated")
+      : t("rating.value", { value, max: MAX_RATING });
 
   return (
     <View
       accessibilityRole="radiogroup"
-      accessibilityLabel={`Note de l'equipe : ${spokenValue(value)}`}
+      accessibilityLabel={t("rating.group", { value: spoken })}
       style={styles.block}
     >
       <View style={styles.stars}>
@@ -47,7 +54,7 @@ export function StarRating({ value, onChange, disabled = false }: Props) {
             <IconButton
               key={star}
               accessibilityRole="radio"
-              accessibilityLabel={`Noter ${star} sur ${MAX_RATING}`}
+              accessibilityLabel={t("rating.star", { star, max: MAX_RATING })}
               accessibilityState={{ checked: value === star, disabled }}
               disabled={disabled}
               icon={filled ? "star" : "star-outline"}
@@ -64,17 +71,11 @@ export function StarRating({ value, onChange, disabled = false }: Props) {
 
       {value === null || disabled ? null : (
         <Button compact mode="text" onPress={() => onChange(null)}>
-          Retirer la note
+          {t("rating.remove")}
         </Button>
       )}
     </View>
   );
-}
-
-/** What a screen reader announces for the group as a whole. */
-function spokenValue(value: number | null): string {
-  if (value === null) return "pas encore notee";
-  return `${value} sur ${MAX_RATING}`;
 }
 
 const styles = StyleSheet.create({

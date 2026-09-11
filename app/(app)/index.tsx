@@ -4,6 +4,7 @@ import { Button } from "react-native-paper";
 
 import { BookList } from "@/features/books/BookList";
 import { HeaderActions, useSession } from "@/features/session";
+import { useTranslation } from "@/i18n";
 
 /**
  * Collection screen. It only wires up navigation: the list, its states and its
@@ -12,6 +13,7 @@ import { HeaderActions, useSession } from "@/features/session";
 export default function BookListScreen() {
   const router = useRouter();
   const { peutEcrire } = useSession();
+  const { t } = useTranslation();
   const create = useCallback(() => router.push("/books/new"), [router]);
 
   // Stable identity down to the memoised rows: recreated on every render, this
@@ -35,8 +37,13 @@ export default function BookListScreen() {
                   label, the icon glyph ends up in the button's accessible name
                   and gets read out loud. */}
               {peutEcrire ? (
-                <Button accessibilityLabel="Ajouter" mode="text" icon="plus" onPress={create}>
-                  Ajouter
+                <Button
+                  accessibilityLabel={t("list.add")}
+                  mode="text"
+                  icon="plus"
+                  onPress={create}
+                >
+                  {t("list.add")}
                 </Button>
               ) : null}
             </HeaderActions>

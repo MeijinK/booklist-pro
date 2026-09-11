@@ -1,14 +1,16 @@
 import { StyleSheet, View } from "react-native";
 
 import { LoadingArea, Skeleton } from "@/components/ui/Skeleton";
+import { useTranslation } from "@/i18n";
 import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
 /** Skeleton of the book record, traced over the BookDetail layout. */
 export function BookDetailSkeleton() {
   const styles = useThemedStyles(makeStyles);
+  const { t } = useTranslation();
 
   return (
-    <LoadingArea label="Chargement de la fiche">
+    <LoadingArea label={t("record.loading")}>
       <View style={styles.block}>
         <View style={styles.header}>
           <View style={styles.identity}>

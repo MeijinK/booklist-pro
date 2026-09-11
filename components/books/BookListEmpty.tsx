@@ -1,4 +1,5 @@
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useTranslation } from "@/i18n";
 
 type Props = {
   /** The search the list answered, so the message can quote it back. */
@@ -19,12 +20,18 @@ type Props = {
  * other for a wider net.
  */
 export function BookListEmpty({ search, narrowed, onCreate, onClear }: Props) {
+  const { t } = useTranslation();
+
   if (!narrowed) {
     return (
       <EmptyState
-        title="Le fonds est vide"
-        description="Aucun ouvrage n'a encore ete saisi pour cette boutique. Commencez par en ajouter un : le cahier se remplit ensuite tout seul."
-        action={onCreate === undefined ? undefined : { label: "Ajouter un ouvrage", onPress: onCreate }}
+        title={t("list.empty.title")}
+        description={t("list.empty.description")}
+        action={
+          onCreate === undefined
+            ? undefined
+            : { label: t("list.empty.action"), onPress: onCreate }
+        }
       />
     );
   }
@@ -33,15 +40,13 @@ export function BookListEmpty({ search, narrowed, onCreate, onClear }: Props) {
 
   return (
     <EmptyState
-      title={
-        searched === "" ? "Aucun ouvrage dans cette selection" : "Aucun ouvrage ne porte ce titre"
-      }
+      title={searched === "" ? t("list.filtered.title") : t("list.searched.title")}
       description={
         searched === ""
-          ? "Le fonds de la boutique ne contient aucun ouvrage repondant a ces filtres. Elargissez la selection pour retrouver le reste du cahier."
-          : `Ni un titre ni un auteur du fonds ne contient « ${searched} ». Verifiez l'orthographe, ou cherchez sur moins de lettres.`
+          ? t("list.filtered.description")
+          : t("list.searched.description", { search: searched })
       }
-      action={{ label: "Afficher tout le fonds", onPress: onClear }}
+      action={{ label: t("list.narrowed.action"), onPress: onClear }}
     />
   );
 }

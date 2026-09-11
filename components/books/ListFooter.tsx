@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { Button, Text } from "react-native-paper";
 
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useTranslation } from "@/i18n";
 import { space } from "@/theme";
 
 type Props = {
@@ -24,23 +25,30 @@ type Props = {
  * the bookseller concludes a book is missing when it is on page three.
  */
 export function ListFooter({ loaded, total, perPage, hasMore, loading, onLoadMore }: Props) {
+  const { t, plural, formatNumber } = useTranslation();
+  const next = Math.min(perPage, total - loaded);
+
   return (
     <View style={styles.block}>
       <Text accessibilityLiveRegion="polite" variant="labelMedium">
-        {loaded} ouvrage{loaded > 1 ? "s" : ""} sur {total}
+        {plural("list.counted", loaded, { total: formatNumber(total) })}
       </Text>
 
       {loading ? (
-        <View accessibilityLabel="Chargement de la suite" accessibilityRole="progressbar" aria-busy>
+        <View
+          accessibilityLabel={t("list.more.loading")}
+          accessibilityRole="progressbar"
+          aria-busy
+        >
           <Skeleton height={20} width={220} />
         </View>
       ) : hasMore ? (
         <Button mode="outlined" onPress={onLoadMore}>
-          {`Charger ${Math.min(perPage, total - loaded)} ouvrages de plus`}
+          {plural("list.more", next)}
         </Button>
       ) : (
         <Text variant="labelMedium" style={styles.end}>
-          Fin du fonds
+          {t("list.end")}
         </Text>
       )}
     </View>

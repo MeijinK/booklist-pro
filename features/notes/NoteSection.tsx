@@ -7,6 +7,7 @@ import { NoteListSkeleton } from "@/components/notes/NoteListSkeleton";
 import { NoteRow } from "@/components/notes/NoteRow";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { useTranslation } from "@/i18n";
 import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
 import { isLocalNote, useCreateNote } from "./useCreateNote";
@@ -25,6 +26,7 @@ type Props = { bookId: string; readOnly?: boolean };
  */
 export function NoteSection({ bookId, readOnly = false }: Props) {
   const styles = useThemedStyles(makeStyles);
+  const { t, formatNumber } = useTranslation();
   const query = useNotes(bookId);
   const creation = useCreateNote(bookId);
   const deletion = useDeleteNote(bookId);
@@ -46,11 +48,11 @@ export function NoteSection({ bookId, readOnly = false }: Props) {
     <View style={styles.block}>
       <View style={styles.header}>
         <Text accessibilityRole="header" variant="titleMedium">
-          Notes de lecture
+          {t("notes.list")}
         </Text>
         {query.isSuccess ? (
           <Text variant="labelMedium" style={styles.count}>
-            {notes.length === 0 ? "aucune" : String(notes.length)}
+            {notes.length === 0 ? t("notes.count.none") : formatNumber(notes.length)}
           </Text>
         ) : null}
       </View>
@@ -63,7 +65,7 @@ export function NoteSection({ bookId, readOnly = false }: Props) {
       {/* Announced as a list in every state, loading included: what is being
           awaited here is a list, and saying so early is what lets a screen
           reader place the wait. */}
-      <View accessibilityLabel="Notes de lecture" accessibilityRole="list" style={styles.list}>
+      <View accessibilityLabel={t("notes.list")} accessibilityRole="list" style={styles.list}>
         {query.isPending ? <NoteListSkeleton /> : null}
 
         {query.isError ? (
@@ -72,8 +74,8 @@ export function NoteSection({ bookId, readOnly = false }: Props) {
 
         {query.isSuccess && notes.length === 0 ? (
           <EmptyState
-            title="Aucune note pour cet ouvrage"
-            description="Personne de l'equipe n'a encore ecrit dessus. La premiere note est celle qui servira au prochain conseil au comptoir."
+            title={t("notes.empty.title")}
+            description={t("notes.empty.description")}
           />
         ) : null}
 

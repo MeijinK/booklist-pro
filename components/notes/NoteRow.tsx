@@ -2,8 +2,8 @@ import { memo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, IconButton, Text } from "react-native-paper";
 
-import { readableDateTime } from "@/components/ui/dates";
 import type { Note } from "@/domain";
+import { useTranslation } from "@/i18n";
 import { radius, space, useAppTheme, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
@@ -27,18 +27,20 @@ type Props = {
 export const NoteRow = memo(function NoteRow({ note, sending, onDelete }: Props) {
   const styles = useThemedStyles(makeStyles);
   const { colors } = useAppTheme();
+  const { t, formatDateTime } = useTranslation();
   const [confirming, setConfirming] = useState(false);
+  const stamp = formatDateTime(note.createdAt);
 
   return (
     <View style={styles.block}>
       <View style={styles.header}>
         <Text variant="labelMedium" style={styles.stamp}>
-          {sending ? "Envoi en cours" : readableDateTime(note.createdAt)}
+          {sending ? t("notes.sending") : stamp}
         </Text>
 
         {sending || onDelete === undefined ? null : (
           <IconButton
-            accessibilityLabel={`Supprimer la note du ${readableDateTime(note.createdAt)}`}
+            accessibilityLabel={t("notes.delete", { date: stamp })}
             icon="trash-can-outline"
             iconColor={colors.textMuted}
             onPress={() => setConfirming(true)}
@@ -55,10 +57,10 @@ export const NoteRow = memo(function NoteRow({ note, sending, onDelete }: Props)
       {confirming ? (
         <View accessibilityRole="alert" style={styles.confirm}>
           <Text variant="bodySmall" style={styles.question}>
-            Retirer cette note du cahier ?
+            {t("notes.delete.question")}
           </Text>
           <Button compact mode="text" onPress={() => setConfirming(false)} style={styles.action}>
-            Conserver
+            {t("notes.delete.keep")}
           </Button>
           <Button
             compact
@@ -70,7 +72,7 @@ export const NoteRow = memo(function NoteRow({ note, sending, onDelete }: Props)
             style={styles.action}
             textColor={colors.destructive}
           >
-            Retirer
+            {t("notes.delete.confirm")}
           </Button>
         </View>
       ) : null}

@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { Button, HelperText, TextInput } from "react-native-paper";
 
 import { NOTE_COUNTER_THRESHOLD, NOTE_MAX_LENGTH, NoteDraftSchema } from "@/domain";
+import { useTranslation } from "@/i18n";
 import { space, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
@@ -24,6 +25,7 @@ type Props = {
  */
 export function NoteComposer({ onSubmit, sending }: Props) {
   const styles = useThemedStyles(makeStyles);
+  const { t, plural } = useTranslation();
   const [text, setText] = useState("");
   const [message, setMessage] = useState<string | undefined>(undefined);
 
@@ -45,11 +47,11 @@ export function NoteComposer({ onSubmit, sending }: Props) {
   return (
     <View style={styles.block}>
       <TextInput
-        accessibilityLabel="Note de lecture"
+        accessibilityLabel={t("notes.compose.label")}
         aria-invalid={message !== undefined}
         disabled={sending}
         error={message !== undefined}
-        label="Ecrire une note de lecture"
+        label={t("notes.compose.placeholder")}
         maxLength={NOTE_MAX_LENGTH}
         mode="outlined"
         multiline
@@ -69,7 +71,7 @@ export function NoteComposer({ onSubmit, sending }: Props) {
           {message === undefined ? (
             counting ? (
               <HelperText type="info" visible>
-                {`${remaining} caracteres restants`}
+                {plural("notes.remaining", remaining)}
               </HelperText>
             ) : null
           ) : (
@@ -86,7 +88,7 @@ export function NoteComposer({ onSubmit, sending }: Props) {
           onPress={() => void submit()}
           style={styles.submit}
         >
-          Ajouter la note
+          {t("notes.compose.submit")}
         </Button>
       </View>
     </View>

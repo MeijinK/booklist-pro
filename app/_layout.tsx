@@ -8,6 +8,7 @@ import type { Settings } from "react-native-paper/lib/typescript/core/settings";
 
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { SessionProvider } from "@/features/session";
+import { I18nProvider } from "@/i18n";
 import { createQueryClient } from "@/services/queryClient";
 import { paperTheme, ThemeProvider, useAppTheme } from "@/theme";
 
@@ -66,13 +67,17 @@ export default function RootLayout() {
     // still render if the theme itself is what failed. It carries the light
     // palette explicitly, being the last screen before a blank page.
     <ErrorBoundary>
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <SessionProvider>
-            <ThemedApp />
-          </SessionProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
+      {/* Above the theme: the login screen and the waiting state both need
+          wording, and they render before any session exists. */}
+      <I18nProvider>
+        <ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <SessionProvider>
+              <ThemedApp />
+            </SessionProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </I18nProvider>
     </ErrorBoundary>
   );
 }

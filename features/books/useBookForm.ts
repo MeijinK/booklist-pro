@@ -9,6 +9,7 @@ import {
   type BookFormValues,
 } from "@/domain";
 import { errorMessage } from "@/features/errors/messages";
+import { useTranslation, type I18n } from "@/i18n";
 
 /** Fields the form knows how to highlight; any other name goes to the banner. */
 const FIELDS = ["titre", "auteur", "editeur", "annee", "lu"] as const;
@@ -49,6 +50,8 @@ type Options = {
  * all that: it goes to the form-level error.
  */
 export function useBookForm({ book, save, onSaved }: Options) {
+  const { t } = useTranslation();
+
   const form: BookForm = useForm<BookFormValues, undefined, BookDraft>({
     resolver: zodResolver(BookFormSchema),
     defaultValues: initialValues(book),
@@ -62,14 +65,15 @@ export function useBookForm({ book, save, onSaved }: Options) {
       await save(draft);
       onSaved();
     } catch (cause) {
-      applyServerError(form, cause);
+      applyServerError(form, cause, t);
     }
   });
 
   return { form, submit };
 }
 
-function applyServerError(form: BookForm, cause: unknown): void {
+/** `t` is handed down rather than read here: a plain function has no context. */
+function applyServerError(form: BookForm, cause: unknown, t: I18n["t"]): void {
   if (cause instanceof ApiError && cause.detail.kind === "validation") {
     const entries = Object.entries(cause.detail.fields);
     const known = entries.filter(([name]) => isFormField(name));
@@ -89,5 +93,5 @@ function applyServerError(form: BookForm, cause: unknown): void {
   }
 
   // Outage, conflict, permissions: nothing to point at field by field.
-  form.setError("root", { type: "server", message: errorMessage(cause).title });
+  form.setError("root", { type: "server", message: t(errorMessage(cause).titleKey) });
 }

@@ -3,6 +3,7 @@ import { useForm, type UseFormReturn } from "react-hook-form";
 
 import { ConnexionSchema, type ConnexionValues } from "@/domain";
 import { errorMessage } from "@/features/errors/messages";
+import { useTranslation } from "@/i18n";
 
 export type ConnexionFormReturn = UseFormReturn<ConnexionValues>;
 
@@ -14,6 +15,8 @@ type Options = { connexion: (email: string, motDePasse: string) => Promise<void>
  * must not, or it would confirm which emails have an account.
  */
 export function useConnexionForm({ connexion }: Options) {
+  const { t } = useTranslation();
+
   const form: ConnexionFormReturn = useForm<ConnexionValues>({
     resolver: zodResolver(ConnexionSchema),
     defaultValues: { email: "", motDePasse: "" },
@@ -24,8 +27,12 @@ export function useConnexionForm({ connexion }: Options) {
     try {
       await connexion(values.email, values.motDePasse);
     } catch (cause) {
-      const { title, detail } = errorMessage(cause);
-      form.setError("root", { type: "server", message: `${title}. ${detail}` });
+      const message = errorMessage(cause);
+      const detail = "key" in message.detail ? t(message.detail.key) : message.detail.text;
+      form.setError("root", {
+        type: "server",
+        message: `${t(message.titleKey)}. ${detail}`,
+      });
     }
   });
 

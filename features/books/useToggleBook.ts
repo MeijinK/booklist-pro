@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient, type InfiniteData, type QueryClient } from "@tanstack/react-query";
 
 import type { Book, Page } from "@/domain";
+import type { MessageKey } from "@/i18n";
 import { patchBook } from "@/services/api/books";
 import { bookKeys } from "@/services/queryKeys";
 
@@ -14,16 +15,16 @@ export type BookToggleInput = {
   changes: BookToggleChanges;
 };
 
-/** Says which refusal to report, so the message names what came back. */
-export function toggleRefusalMessage(changes: BookToggleChanges): string {
-  const action = refusedAction(changes);
-  return `Le serveur a refuse ${action}. La fiche est revenue a son etat precedent.`;
-}
-
-function refusedAction(changes: BookToggleChanges): string {
-  if ("favori" in changes) return "ce coup de coeur";
-  if ("note" in changes) return "cette note";
-  return "ce changement de statut";
+/**
+ * Says which refusal to report, so the message names what came back.
+ *
+ * A key rather than a sentence: this function has no access to the language,
+ * and the interface is bilingual.
+ */
+export function toggleRefusalKey(changes: BookToggleChanges): MessageKey {
+  if ("favori" in changes) return "toggle.refused.favourite";
+  if ("note" in changes) return "toggle.refused.note";
+  return "toggle.refused.status";
 }
 
 /** Applies a change to the record and to every list holding the book. */

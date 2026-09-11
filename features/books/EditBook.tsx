@@ -2,6 +2,7 @@ import { BookDetailSkeleton } from "@/components/books/BookDetailSkeleton";
 import { BookFields } from "@/components/books/BookFields";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { useTranslation } from "@/i18n";
 
 import { useBook } from "./useBook";
 import { useBookForm } from "./useBookForm";
@@ -22,15 +23,16 @@ type Props = {
  */
 export function EditBook({ id, onSaved, onCancel }: Props) {
   const query = useBook(id);
+  const { t } = useTranslation();
 
   if (query.isPending) return <BookDetailSkeleton />;
 
   if (query.isError) {
     return query.error.detail.kind === "notFound" ? (
       <EmptyState
-        title="Cette fiche n'existe plus"
-        description="Elle a ete supprimee depuis un autre poste. Rien de ce que vous saisiriez ici ne serait conserve."
-        action={{ label: "Revenir au fonds", onPress: onCancel }}
+        title={t("form.gone.title")}
+        description={t("form.gone.description")}
+        action={{ label: t("record.gone.action"), onPress: onCancel }}
       />
     ) : (
       <ErrorState error={query.error} onRetry={() => void query.refetch()} />
@@ -53,6 +55,7 @@ type LoadedFormProps = {
  */
 function LoadedForm({ book, onSaved, onCancel }: LoadedFormProps) {
   const update = useUpdateBook(book.id);
+  const { t } = useTranslation();
 
   const { form, submit } = useBookForm({
     book,
@@ -66,7 +69,7 @@ function LoadedForm({ book, onSaved, onCancel }: LoadedFormProps) {
     <BookFields
       form={form}
       submit={() => void submit()}
-      submitLabel="Enregistrer les corrections"
+      submitLabel={t("form.submit.edit")}
       onCancel={onCancel}
     />
   );

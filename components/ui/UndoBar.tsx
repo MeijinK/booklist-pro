@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { ProgressBar, Snackbar, Text, useTheme } from "react-native-paper";
 
+import { useTranslation } from "@/i18n";
 import { space } from "@/theme";
 
 const STEP_MS = 100;
@@ -25,6 +26,7 @@ type Props = {
 export function UndoBar({ message, onUndo, delayMs, resetKey }: Props) {
   const [remaining, setRemaining] = useState(delayMs);
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setRemaining(delayMs);
@@ -44,7 +46,7 @@ export function UndoBar({ message, onUndo, delayMs, resetKey }: Props) {
       // Paper's automatic dismissal must decide nothing.
       onDismiss={() => {}}
       duration={Number.POSITIVE_INFINITY}
-      action={{ label: "Annuler", onPress: onUndo }}
+      action={{ label: t("record.undo"), onPress: onUndo }}
     >
       <View style={styles.block}>
         <Text style={{ color: colors.inverseOnSurface }}>{message}</Text>

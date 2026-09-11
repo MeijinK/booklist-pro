@@ -4,6 +4,7 @@ import { Chip, Divider, Icon, List } from "react-native-paper";
 
 import { FavouriteButton } from "@/components/ui/FavouriteButton";
 import type { Book } from "@/domain";
+import { useTranslation } from "@/i18n";
 import { space, useAppTheme } from "@/theme";
 
 type Props = {
@@ -36,13 +37,17 @@ export const BookRow = memo(function BookRow({
   readOnly = false,
 }: Props) {
   const { colors } = useAppTheme();
+  const { t } = useTranslation();
 
   return (
     <>
       <View style={styles.row}>
         <List.Item
           accessibilityRole="link"
-          accessibilityLabel={`${book.titre}, ${book.auteur}${book.lu ? ", lu" : ""}`}
+          accessibilityLabel={t(book.lu ? "row.label.read" : "row.label", {
+            titre: book.titre,
+            auteur: book.auteur,
+          })}
           onPress={() => onOpen(book.id)}
           style={styles.entry}
           title={book.titre}
@@ -56,7 +61,7 @@ export const BookRow = memo(function BookRow({
               // Always text, never a colour dot alone: the status must stay
               // readable with altered colour vision.
               <Chip compact mode="flat" style={styles.status}>
-                lu
+                {t("row.read")}
               </Chip>
             ) : null
           }

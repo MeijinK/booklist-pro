@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import { Chip } from "react-native-paper";
 
+import { useTranslation } from "@/i18n";
 import { radius, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
@@ -30,10 +31,14 @@ type Props = {
  */
 export function FilterChip({ label, name, selected, onPress, icon }: Props) {
   const styles = useThemedStyles(makeStyles);
+  const { t } = useTranslation();
 
   return (
     <Chip
-      accessibilityLabel={`${name}, ${selected ? "actif" : "inactif"}`}
+      accessibilityLabel={t("filter.state", {
+        name,
+        state: t(selected ? "filter.state.on" : "filter.state.off"),
+      })}
       icon={icon}
       mode={selected ? "flat" : "outlined"}
       onPress={onPress}

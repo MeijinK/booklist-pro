@@ -2,10 +2,10 @@ import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { Divider, Text } from "react-native-paper";
 
-import { readableDate } from "@/components/ui/dates";
 import { StarRating } from "@/components/ui/StarRating";
 import { ToggleControl } from "@/components/ui/ToggleControl";
 import type { Book } from "@/domain";
+import { useTranslation } from "@/i18n";
 import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
@@ -25,6 +25,7 @@ type Props = {
  */
 export function BookDetail({ book, onToggleRead, onToggleFavourite, readOnly = false, onRate }: Props) {
   const styles = useThemedStyles(makeStyles);
+  const { t, formatDate } = useTranslation();
 
   return (
     <View style={styles.block}>
@@ -38,16 +39,16 @@ export function BookDetail({ book, onToggleRead, onToggleFavourite, readOnly = f
             <ToggleControl
               checked={book.lu}
               icon={{ on: "check-circle", off: "check-circle-outline" }}
-              label={book.lu ? "Lu" : "Non lu"}
-              name="Statut de lecture"
+              label={book.lu ? t("toggle.read.on") : t("toggle.read.off")}
+              name={t("toggle.read.name")}
               onToggle={onToggleRead}
               readOnly={readOnly}
             />
             <ToggleControl
               checked={book.favori}
               icon={{ on: "heart", off: "heart-outline" }}
-              label="Coup de coeur"
-              name="Coup de coeur"
+              label={t("toggle.favourite.name")}
+              name={t("toggle.favourite.name")}
               onToggle={onToggleFavourite}
               readOnly={readOnly}
             />
@@ -56,15 +57,15 @@ export function BookDetail({ book, onToggleRead, onToggleFavourite, readOnly = f
       </View>
 
       <View style={styles.fields}>
-        <Row label="Editeur" value={book.editeur} />
-        <Row label="Annee de publication" value={String(book.annee)} />
+        <Row label={t("field.editeur")} value={book.editeur} />
+        <Row label={t("field.annee")} value={String(book.annee)} />
         {/* The only editable field of the block: rating a book is a daily
             gesture, and sending the bookseller through the form for one star
             would put a title correction at risk on every rating. */}
-        <Row label="Note de l'equipe">
+        <Row label={t("field.note")}>
           <StarRating value={book.note} onChange={onRate} />
         </Row>
-        <Row label="Derniere modification" value={readableDate(book.updatedAt)} />
+        <Row label={t("field.updated")} value={formatDate(book.updatedAt)} />
       </View>
     </View>
   );
