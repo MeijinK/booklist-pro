@@ -76,6 +76,7 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
           book={book}
           onToggleRead={(lu) => toggle.mutate({ id: book.id, changes: { lu } })}
           onToggleFavourite={(favori) => toggle.mutate({ id: book.id, changes: { favori } })}
+          onRate={(note) => toggle.mutate({ id: book.id, changes: { note } })}
         />
 
         {/* Complementary information, after the shop's own data and before the

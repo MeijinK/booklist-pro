@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { Divider, Text } from "react-native-paper";
 
 import { readableDate } from "@/components/ui/dates";
+import { StarRating } from "@/components/ui/StarRating";
 import { ToggleControl } from "@/components/ui/ToggleControl";
 import type { Book } from "@/domain";
 import { radius, space, useThemedStyles, type Palette } from "@/theme";
@@ -10,6 +12,7 @@ type Props = {
   book: Book;
   onToggleRead: (lu: boolean) => void;
   onToggleFavourite: (favori: boolean) => void;
+  onRate: (note: number | null) => void;
 };
 
 /**
@@ -19,7 +22,7 @@ type Props = {
  * form are raised as callbacks, so this component stays mountable as is in a
  * test, and the optimistic write keeps a single owner in features/books.
  */
-export function BookDetail({ book, onToggleRead, onToggleFavourite }: Props) {
+export function BookDetail({ book, onToggleRead, onToggleFavourite, onRate }: Props) {
   const styles = useThemedStyles(makeStyles);
 
   return (
@@ -52,17 +55,26 @@ export function BookDetail({ book, onToggleRead, onToggleFavourite }: Props) {
       <View style={styles.fields}>
         <Row label="Editeur" value={book.editeur} />
         <Row label="Annee de publication" value={String(book.annee)} />
-        <Row
-          label="Note de l'equipe"
-          value={book.note === null ? "Pas encore notee" : `${book.note} sur 5`}
-        />
+        {/* The only editable field of the block: rating a book is a daily
+            gesture, and sending the bookseller through the form for one star
+            would put a title correction at risk on every rating. */}
+        <Row label="Note de l'equipe">
+          <StarRating value={book.note} onChange={onRate} />
+        </Row>
         <Row label="Derniere modification" value={readableDate(book.updatedAt)} />
       </View>
     </View>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+type RowProps = {
+  label: string;
+  /** A plain value, or a control when the field is editable in place. */
+  value?: string;
+  children?: ReactNode;
+};
+
+function Row({ label, value, children }: RowProps) {
   const styles = useThemedStyles(makeStyles);
 
   return (
@@ -71,7 +83,7 @@ function Row({ label, value }: { label: string; value: string }) {
         <Text variant="labelMedium" style={styles.label}>
           {label}
         </Text>
-        <Text variant="bodyLarge">{value}</Text>
+        {children ?? <Text variant="bodyLarge">{value}</Text>}
       </View>
       <Divider />
     </View>
