@@ -13,28 +13,29 @@ import {
   type SortOrder,
 } from "@/domain";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
+import { useTranslation, type MessageKey } from "@/i18n";
 import { space, useThemedStyles, type Palette } from "@/theme";
 
 /** Long enough to let a word be typed, short enough to feel immediate. */
 export const SEARCH_DEBOUNCE_MS = 300;
 
 /** The four sort criteria the brief names, in the order the menu shows them. */
-const SORT_LABELS: Readonly<Record<SortChoice, string>> = {
-  titre: "Titre",
-  auteur: "Auteur",
-  annee: "Annee de publication",
-  note: "Note de l'equipe",
+const SORT_KEYS: Readonly<Record<SortChoice, MessageKey>> = {
+  titre: "sort.field.titre",
+  auteur: "sort.field.auteur",
+  annee: "sort.field.annee",
+  note: "sort.field.note",
 };
 
-const ORDER_LABELS: Readonly<Record<SortOrder, string>> = {
-  asc: "croissant",
-  desc: "decroissant",
+const ORDER_KEYS: Readonly<Record<SortOrder, MessageKey>> = {
+  asc: "sort.order.asc",
+  desc: "sort.order.desc",
 };
 
-const STATUSES: readonly { value: ReadStatus | undefined; label: string }[] = [
-  { value: undefined, label: "Tous" },
-  { value: "nonlu", label: "Non lus" },
-  { value: "lu", label: "Lus" },
+const STATUSES: readonly { value: ReadStatus | undefined; key: MessageKey }[] = [
+  { value: undefined, key: "filter.status.all" },
+  { value: "nonlu", key: "filter.status.unread" },
+  { value: "lu", key: "filter.status.read" },
 ];
 
 type Props = {
@@ -63,6 +64,7 @@ type Props = {
  */
 export function BookToolbar(props: Props) {
   const styles = useThemedStyles(makeStyles);
+  const { t, locale } = useTranslation();
   const { search, status, favouritesOnly, sort, order } = props;
   const { onSearchChange, onStatusChange, onFavouritesChange, onSortChange, onOrderChange } = props;
 
@@ -111,17 +113,20 @@ export function BookToolbar(props: Props) {
     onOrderChange(value);
   };
 
-  const sortSummary = `${SORT_LABELS[sort]}, ${ORDER_LABELS[order]}`;
+  const sortSummary = t("sort.summary", {
+    field: t(SORT_KEYS[sort]),
+    order: t(ORDER_KEYS[order]),
+  });
 
   return (
     <View style={styles.block}>
       <Searchbar
-        accessibilityLabel="Rechercher un ouvrage par titre ou par auteur"
-        clearAccessibilityLabel="Effacer la recherche"
+        accessibilityLabel={t("search.label")}
+        clearAccessibilityLabel={t("search.clear")}
         elevation={0}
         onChangeText={change}
         onClearIconPress={clear}
-        placeholder="Titre ou auteur"
+        placeholder={t("search.placeholder")}
         style={styles.search}
         value={text}
       />
@@ -133,9 +138,9 @@ export function BookToolbar(props: Props) {
         <View style={styles.chips}>
           {STATUSES.map((entry) => (
             <FilterChip
-              key={entry.label}
-              label={entry.label}
-              name={`Statut ${entry.label.toLowerCase()}`}
+              key={entry.key}
+              label={t(entry.key)}
+              name={t("filter.status.name", { label: t(entry.key).toLocaleLowerCase(locale) })}
               selected={status === entry.value}
               onPress={() => onStatusChange(entry.value)}
             />
@@ -144,8 +149,8 @@ export function BookToolbar(props: Props) {
 
         <FilterChip
           icon={favouritesOnly ? "heart" : "heart-outline"}
-          label="Coups de coeur"
-          name="Coups de coeur uniquement"
+          label={t("filter.favourites")}
+          name={t("filter.favourites.name")}
           selected={favouritesOnly}
           onPress={() => onFavouritesChange(!favouritesOnly)}
         />
@@ -157,7 +162,7 @@ export function BookToolbar(props: Props) {
           onDismiss={() => setSorting(false)}
           anchor={
             <Button
-              accessibilityLabel={`Trier la liste. Actuellement : ${sortSummary}`}
+              accessibilityLabel={t("sort.label", { summary: sortSummary })}
               icon="sort"
               mode="outlined"
               onPress={() => setSorting(true)}
@@ -171,7 +176,7 @@ export function BookToolbar(props: Props) {
             <Menu.Item
               key={field}
               onPress={() => chooseSort(field)}
-              title={SORT_LABELS[field]}
+              title={t(SORT_KEYS[field])}
               trailingIcon={sort === field ? "check" : undefined}
             />
           ))}
@@ -182,7 +187,7 @@ export function BookToolbar(props: Props) {
             <Menu.Item
               key={value}
               onPress={() => chooseOrder(value)}
-              title={`Ordre ${ORDER_LABELS[value]}`}
+              title={t("sort.order.item", { order: t(ORDER_KEYS[value]) })}
               trailingIcon={order === value ? "check" : undefined}
             />
           ))}
