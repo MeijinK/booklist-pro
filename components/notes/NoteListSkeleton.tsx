@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { LoadingArea, Skeleton } from "@/components/ui/Skeleton";
+import { useTranslation } from "@/i18n";
 import { space, useThemedStyles, type Palette } from "@/theme";
 
 type Props = { rows?: number };
@@ -13,9 +14,10 @@ type Props = { rows?: number };
  */
 export function NoteListSkeleton({ rows = 2 }: Props) {
   const styles = useThemedStyles(makeStyles);
+  const { t } = useTranslation();
 
   return (
-    <LoadingArea label="Chargement des notes de lecture">
+    <LoadingArea label={t("notes.loading")}>
       {Array.from({ length: rows }, (_, index) => (
         <View key={index} style={styles.row}>
           <Skeleton height={12} width={160} />
