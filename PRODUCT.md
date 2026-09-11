@@ -58,16 +58,19 @@ familiarite, aucun emoji.
 
 ## Perimetre ecarte
 
-**Envoi et retrait d'une couverture par le libraire.** Les routes
-`POST /books/:id/cover` et `DELETE /books/:id/cover` figurent a l'annexe du
-sujet, mais l'API livree (`api-books-v2`) n'expose aucune route de couverture :
-ni celles-la, ni la couverture generee `GET /covers/:id.svg`. Arbitrage du
-responsable produit : la fonctionnalite sort du perimetre plutot que d'etendre
-l'API.
+**Les couvertures d'ouvrage, en entier.** L'API livree (`api-books-v2`)
+n'expose aucune des trois routes que l'annexe du sujet annonce : ni la
+couverture generee `GET /covers/:id.svg`, ni l'envoi `POST /books/:id/cover`,
+ni le retrait `DELETE /books/:id/cover`. Le champ `couverture` vaut par
+consequent `null` sur les 500 ouvrages du fonds.
 
-Consequence directe : le champ `couverture` vaut `null` sur les 500 ouvrages du
-fonds. L'affichage repose donc sur un service tiers quand l'ouvrage y est
-reference, et sur un repli local sinon. Voir ADR 004.
+Arbitrage du responsable produit : la fonctionnalite sort du perimetre plutot
+que d'etendre l'API. La liste et la fiche n'affichent donc aucune vignette, et
+l'enrichissement bibliographique se limite au nombre d'editions referencees et
+a la premiere annee de publication. Voir ADR 004.
+
+Le champ reste lu et valide dans le modele, puisqu'il fait partie du contrat de
+l'API : c'est son affichage qui est ecarte, pas sa presence.
 
 ## Anti-references
 

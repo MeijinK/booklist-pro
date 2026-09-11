@@ -13,7 +13,6 @@ import { NO_ENRICHMENT, type BookEnrichment } from "@/domain";
  */
 
 const SEARCH_URL = "https://openlibrary.org/search.json";
-const COVERS_URL = "https://covers.openlibrary.org/b/id";
 
 /**
  * Shorter than the main API's timeout. Enrichment is a nicety: waiting ten
@@ -21,24 +20,13 @@ const COVERS_URL = "https://covers.openlibrary.org/b/id";
  */
 export const ENRICHMENT_TIMEOUT_MS = 5000;
 
-export type CoverSize = "S" | "M" | "L";
-
-/**
- * Addressing a cover by its numeric id is the only form OpenLibrary does not
- * rate-limit — unlike lookups by ISBN or OLID.
- */
-export function openLibraryCoverUrl(coverId: number, size: CoverSize = "M"): string {
-  return `${COVERS_URL}/${coverId}-${size}.jpg`;
-}
-
-/** Only the three fields we display; `fields` keeps the payload small. */
+/** Only the two fields we display; `fields` keeps the payload small. */
 const SearchResponseSchema = z.object({
   numFound: z.number().int().nonnegative(),
   docs: z.array(
     z.object({
       title: z.string().optional(),
       first_publish_year: z.number().int().optional(),
-      cover_i: z.number().int().optional(),
     }),
   ),
 });
@@ -47,7 +35,7 @@ function buildUrl(title: string): string {
   const params = new URLSearchParams({
     title,
     limit: "1",
-    fields: "title,first_publish_year,cover_i",
+    fields: "title,first_publish_year",
   });
 
   return `${SEARCH_URL}?${params.toString()}`;
@@ -55,7 +43,6 @@ function buildUrl(title: string): string {
 
 export type EnrichmentOptions = {
   signal?: AbortSignal;
-  size?: CoverSize;
   timeoutMs?: number;
 };
 
@@ -92,7 +79,10 @@ export async function fetchEnrichment(
     const parsed = SearchResponseSchema.safeParse(await response.json());
     if (!parsed.success) return NO_ENRICHMENT;
 
-    return toEnrichment(parsed.data, options.size);
+    return {
+      editionCount: parsed.data.numFound,
+      firstPublishYear: parsed.data.docs[0]?.first_publish_year ?? null,
+    };
   } catch (cause) {
     if (options.signal?.aborted) throw cause;
     return NO_ENRICHMENT;
@@ -100,17 +90,4 @@ export async function fetchEnrichment(
     clearTimeout(timer);
     options.signal?.removeEventListener("abort", relayAbort);
   }
-}
-
-function toEnrichment(
-  data: z.infer<typeof SearchResponseSchema>,
-  size: CoverSize = "M",
-): BookEnrichment {
-  const first = data.docs[0];
-
-  return {
-    editionCount: data.numFound,
-    firstPublishYear: first?.first_publish_year ?? null,
-    coverUrl: first?.cover_i === undefined ? null : openLibraryCoverUrl(first.cover_i, size),
-  };
 }

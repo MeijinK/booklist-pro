@@ -2,7 +2,6 @@ import { memo } from "react";
 import { StyleSheet, View } from "react-native";
 import { Chip, Divider, List } from "react-native-paper";
 
-import { Cover } from "@/components/ui/Cover";
 import { FavouriteButton } from "@/components/ui/FavouriteButton";
 import type { Book } from "@/domain";
 import { space } from "@/theme";
@@ -43,11 +42,6 @@ export const BookRow = memo(function BookRow({ book, onOpen, onToggleFavourite }
           // without imposing three columns, which would break below 480 px.
           description={`${book.auteur} · ${book.editeur} · ${book.annee}`}
           descriptionNumberOfLines={1}
-          left={() => (
-            <View style={styles.cover}>
-              <Cover source={book.couverture} title={book.titre} />
-            </View>
-          )}
           right={() =>
             book.lu ? (
               // Always text, never a colour dot alone: the status must stay
@@ -75,7 +69,6 @@ export const BookRow = memo(function BookRow({ book, onOpen, onToggleFavourite }
 const styles = StyleSheet.create({
   row: { alignItems: "center", flexDirection: "row" },
   entry: { flexShrink: 1, flexGrow: 1 },
-  cover: { justifyContent: "center", paddingLeft: space.lg },
   status: { alignSelf: "center" },
   heart: { paddingRight: space.sm },
 });

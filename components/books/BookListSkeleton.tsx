@@ -8,8 +8,8 @@ type Props = { rows?: number };
 /**
  * Skeleton of the collection list.
  *
- * Its shape matches BookRow exactly: same thumbnail, same pair of text lines,
- * same height. A skeleton that does not look like the final content produces a
+ * Its shape matches BookRow exactly: the same pair of text lines, the same
+ * height. A skeleton that does not look like the final content produces a
  * layout jump when the data arrives.
  */
 export function BookListSkeleton({ rows = 8 }: Props) {
@@ -19,7 +19,6 @@ export function BookListSkeleton({ rows = 8 }: Props) {
     <LoadingArea label="Chargement du fonds">
       {Array.from({ length: rows }, (_, index) => (
         <View key={index} style={styles.row}>
-          <Skeleton block height={56} width={40} />
           <View style={styles.texts}>
             {/* Uneven widths: identical bars read as a grid, not as text being
                 awaited. */}

@@ -20,7 +20,7 @@ export const space = {
 } as const;
 
 export const radius = {
-  /** Cover thumbnail. */
+  /** Chip, small control. */
   sm: 4,
   /** Panel, field group. */
   md: 8,

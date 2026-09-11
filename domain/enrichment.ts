@@ -12,13 +12,10 @@ export type BookEnrichment = {
    */
   editionCount: number;
   firstPublishYear: number | null;
-  /** Absolute cover address, or null when no image is referenced. */
-  coverUrl: string | null;
 };
 
 /** What every failure degrades to: an answer, never an exception. */
 export const NO_ENRICHMENT: BookEnrichment = {
   editionCount: 0,
   firstPublishYear: null,
-  coverUrl: null,
 };
