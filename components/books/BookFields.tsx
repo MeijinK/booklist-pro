@@ -4,6 +4,7 @@ import { Banner, Button, List, Switch } from "react-native-paper";
 
 import { MIN_PUBLICATION_YEAR } from "@/domain";
 import type { BookForm } from "@/features/books/useBookForm";
+import { useTranslation } from "@/i18n";
 import { MAX_TEXT_WIDTH, space } from "@/theme";
 
 import { BookField } from "./BookField";
@@ -23,6 +24,7 @@ type Props = {
  * form, without a server.
  */
 export function BookFields({ form, submit, submitLabel, onCancel }: Props) {
+  const { t } = useTranslation();
   const { control, formState } = form;
   const rootError = formState.errors.root?.message;
 
@@ -34,13 +36,13 @@ export function BookFields({ form, submit, submitLabel, onCancel }: Props) {
           {rootError ?? ""}
         </Banner>
 
-        <BookField autoFocus control={control} label="Titre" name="titre" />
-        <BookField control={control} label="Auteur" name="auteur" />
-        <BookField control={control} label="Editeur" name="editeur" />
+        <BookField autoFocus control={control} label={t("form.titre")} name="titre" />
+        <BookField control={control} label={t("form.auteur")} name="auteur" />
+        <BookField control={control} label={t("form.editeur")} name="editeur" />
         <BookField
-          hint={`Quatre chiffres, a partir de ${MIN_PUBLICATION_YEAR}.`}
+          hint={t("form.annee.hint", { min: MIN_PUBLICATION_YEAR })}
           control={control}
-          label="Annee de publication"
+          label={t("form.annee")}
           maxLength={4}
           name="annee"
           numeric
@@ -51,11 +53,11 @@ export function BookFields({ form, submit, submitLabel, onCancel }: Props) {
           name="lu"
           render={({ field }) => (
             <List.Item
-              title="Deja lu"
-              description="L'equipe de la boutique a lu cet ouvrage."
+              title={t("form.read.title")}
+              description={t("form.read.description")}
               right={() => (
                 <Switch
-                  accessibilityLabel="Deja lu"
+                  accessibilityLabel={t("form.read.title")}
                   onValueChange={field.onChange}
                   value={field.value}
                 />
@@ -66,7 +68,7 @@ export function BookFields({ form, submit, submitLabel, onCancel }: Props) {
 
         <View style={styles.actions}>
           <Button mode="outlined" onPress={onCancel} disabled={formState.isSubmitting}>
-            Annuler
+            {t("form.cancel")}
           </Button>
           {/* Disabled while sending: without this, a double click on a slow link
               creates the same book twice. */}
