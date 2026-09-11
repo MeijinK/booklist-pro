@@ -111,7 +111,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       formatDateTime: (iso) => {
         const date = parse(iso);
         if (date === undefined) return iso;
-        return `${dates.format(date)} ${locale === "fr" ? "à" : "at"} ${times.format(date)}`;
+        return `${dates.format(date)} ${messages["datetime.at"]} ${times.format(date)}`;
       },
     };
   }, [locale, stored.value, stored.set, stored.loaded]);

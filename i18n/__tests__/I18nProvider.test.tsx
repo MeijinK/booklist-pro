@@ -136,6 +136,6 @@ describe("formats", () => {
   it("keeps the time on a reading note, which the day alone would not order", () => {
     wrap(show((i18n) => i18n.formatDateTime("2026-07-28T09:40:00.000Z")));
 
-    expect(screen.getByText(/28 juillet 2026 à \d{2}:\d{2}/)).toBeOnTheScreen();
+    expect(screen.getByText(/28 juillet 2026 a \d{2}:\d{2}/)).toBeOnTheScreen();
   });
 });

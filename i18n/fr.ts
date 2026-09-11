@@ -59,6 +59,7 @@ export const fr = {
   "list.more.other": "Charger {count} ouvrages de plus",
   "list.counted.one": "1 ouvrage sur {total}",
   "list.counted.other": "{count} ouvrages sur {total}",
+  "list.end": "Fin du fonds",
 
   "list.empty.title": "Le fonds est vide",
   "list.empty.description":
@@ -133,16 +134,23 @@ export const fr = {
     "Elle a ete supprimee depuis un autre poste. Rien de ce que vous saisiriez ici ne serait conserve.",
 
   "notes.list": "Notes de lecture",
+  "notes.count.none": "aucune",
   "notes.loading": "Chargement des notes de lecture",
   "notes.empty.title": "Aucune note pour cet ouvrage",
   "notes.empty.description":
     "Personne de l'equipe n'a encore ecrit dessus. La premiere note est celle qui servira au prochain conseil au comptoir.",
   "notes.compose.label": "Note de lecture",
   "notes.compose.placeholder": "Ecrire une note de lecture",
+  "notes.compose.submit": "Ajouter la note",
   "notes.remaining.one": "1 caractere restant",
   "notes.remaining.other": "{count} caracteres restants",
   "notes.sending": "Envoi en cours",
+  /** Joins a date to its time: "28 juillet 2026 a 09:40". */
+  "datetime.at": "a",
   "notes.delete": "Supprimer la note du {date}",
+  "notes.delete.question": "Retirer cette note du cahier ?",
+  "notes.delete.keep": "Conserver",
+  "notes.delete.confirm": "Retirer",
 
   "error.retry": "Reessayer",
   "error.unexpected.title": "Une erreur inattendue s'est produite",

@@ -54,6 +54,7 @@ export const en: Messages = {
   "list.more.other": "Load {count} more books",
   "list.counted.one": "1 book out of {total}",
   "list.counted.other": "{count} books out of {total}",
+  "list.end": "End of the collection",
 
   "list.empty.title": "The collection is empty",
   "list.empty.description":
@@ -128,16 +129,22 @@ export const en: Messages = {
     "It was deleted from another workstation. Nothing you enter here would be kept.",
 
   "notes.list": "Reading notes",
+  "notes.count.none": "none",
   "notes.loading": "Loading the reading notes",
   "notes.empty.title": "No note for this book",
   "notes.empty.description":
     "Nobody on the team has written about it yet. The first note is the one that will serve the next recommendation at the counter.",
   "notes.compose.label": "Reading note",
   "notes.compose.placeholder": "Write a reading note",
+  "notes.compose.submit": "Add the note",
   "notes.remaining.one": "1 character left",
   "notes.remaining.other": "{count} characters left",
   "notes.sending": "Sending",
+  "datetime.at": "at",
   "notes.delete": "Delete the note from {date}",
+  "notes.delete.question": "Remove this note from the ledger?",
+  "notes.delete.keep": "Keep",
+  "notes.delete.confirm": "Remove",
 
   "error.retry": "Try again",
   "error.unexpected.title": "An unexpected error occurred",
