@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useTranslation } from "@/i18n";
 import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
 type Props = {
@@ -27,11 +28,12 @@ type Props = {
  */
 export function BookEnrichment({ editionCount, firstPublishYear, loading }: Props) {
   const styles = useThemedStyles(makeStyles);
+  const { t, plural } = useTranslation();
 
   return (
     <View style={styles.block}>
       <Text variant="labelMedium" style={styles.caption}>
-        Ailleurs dans les catalogues
+        {t("enrichment.caption")}
       </Text>
 
       {loading ? (
@@ -40,32 +42,23 @@ export function BookEnrichment({ editionCount, firstPublishYear, loading }: Prop
         </View>
       ) : (
         <View style={styles.line}>
-          <Text variant="bodyLarge">{editionsLabel(editionCount)}</Text>
+          {/* Nothing found is a normal answer for a collection partly entered in
+              a hurry, so the catalogue gives it a sentence of its own rather
+              than a bare zero. An outage reads the same, by design. */}
+          <Text variant="bodyLarge">{plural("enrichment.editions", editionCount)}</Text>
           {firstPublishYear === null ? null : (
             <Text variant="bodyMedium" style={styles.detail}>
-              {`Premiere publication en ${firstPublishYear}`}
+              {t("enrichment.year", { year: firstPublishYear })}
             </Text>
           )}
         </View>
       )}
 
       <Text variant="labelSmall" style={styles.source}>
-        D&apos;apres OpenLibrary
+        {t("enrichment.source")}
       </Text>
     </View>
   );
-}
-
-/**
- * Nothing found is a normal answer for a collection partly entered in a hurry,
- * so it gets a sentence of its own rather than a bare zero. An outage produces
- * the same sentence: the enrichment degrades silently, by design.
- */
-function editionsLabel(count: number): string {
-  if (count === 0) return "Aucune edition referencee";
-  if (count === 1) return "1 edition referencee";
-
-  return `${count.toLocaleString("fr-FR")} editions referencees`;
 }
 
 const makeStyles = (colors: Palette) =>

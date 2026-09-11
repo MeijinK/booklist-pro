@@ -7,7 +7,9 @@ import { PaperProvider } from "react-native-paper";
 import type { Settings } from "react-native-paper/lib/typescript/core/settings";
 
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { LanguageMenu } from "@/components/ui/LanguageMenu";
 import { ThemeMenu } from "@/components/ui/ThemeMenu";
+import { I18nProvider, useTranslation } from "@/i18n";
 import { createQueryClient } from "@/services/queryClient";
 import { paperTheme, ThemeProvider, useAppTheme } from "@/theme";
 
@@ -20,6 +22,7 @@ export const unstable_settings = { anchor: "index" };
  */
 function ThemedApp() {
   const { colors, scheme } = useAppTheme();
+  const { t } = useTranslation();
   const theme = paperTheme(scheme);
 
   /**
@@ -49,14 +52,20 @@ function ThemedApp() {
           headerShadowVisible: false,
           contentStyle: { backgroundColor: colors.background },
           // Reachable from every screen: a bookseller who finds the glare
-          // unbearable should not have to navigate back to fix it.
-          headerRight: () => <ThemeMenu />,
+          // unbearable, or the wrong language, should not have to navigate back
+          // to fix it.
+          headerRight: () => (
+            <>
+              <LanguageMenu />
+              <ThemeMenu />
+            </>
+          ),
         }}
       >
-        <Stack.Screen name="index" options={{ title: "Le fonds" }} />
-        <Stack.Screen name="books/new" options={{ title: "Nouvel ouvrage" }} />
-        <Stack.Screen name="books/[id]/index" options={{ title: "Fiche" }} />
-        <Stack.Screen name="books/[id]/edit" options={{ title: "Corriger la fiche" }} />
+        <Stack.Screen name="index" options={{ title: t("screen.list") }} />
+        <Stack.Screen name="books/new" options={{ title: t("screen.new") }} />
+        <Stack.Screen name="books/[id]/index" options={{ title: t("screen.detail") }} />
+        <Stack.Screen name="books/[id]/edit" options={{ title: t("screen.edit") }} />
       </Stack>
       {/* Follows the scheme: a dark status bar over a dark header is unreadable. */}
       <StatusBar style={scheme === "dark" ? "light" : "dark"} />
@@ -74,11 +83,13 @@ export default function RootLayout() {
     // still render if the theme itself is what failed. It carries the light
     // palette explicitly, being the last screen before a blank page.
     <ErrorBoundary>
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <ThemedApp />
-        </QueryClientProvider>
-      </ThemeProvider>
+      <I18nProvider>
+        <ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <ThemedApp />
+          </QueryClientProvider>
+        </ThemeProvider>
+      </I18nProvider>
     </ErrorBoundary>
   );
 }
