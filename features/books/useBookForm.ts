@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useRef } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 
 import {
@@ -9,6 +10,7 @@ import {
   type BookFormValues,
 } from "@/domain";
 import { errorMessage } from "@/features/errors/messages";
+import { useBrouillon } from "@/features/sync/useBrouillon";
 import { useTranslation, type I18n } from "@/i18n";
 
 /** Fields the form knows how to highlight; any other name goes to the banner. */
@@ -38,7 +40,28 @@ type Options = {
   /** The real send. Rejects with an ApiError, which this hook dispatches. */
   save: (draft: BookDraft) => Promise<unknown>;
   onSaved: () => void;
+  /** When given, the fields survive a reload under this key until they are sent. */
+  brouillonCle?: string;
 };
+
+/** A stored draft the form can be reset to; anything else is ignored. */
+function parseBrouillon(brut: string): BookFormValues | undefined {
+  try {
+    const json: unknown = JSON.parse(brut);
+    if (typeof json !== "object" || json === null) return undefined;
+    const v = json as Record<string, unknown>;
+    return {
+      titre: typeof v.titre === "string" ? v.titre : "",
+      auteur: typeof v.auteur === "string" ? v.auteur : "",
+      editeur: typeof v.editeur === "string" ? v.editeur : "",
+      annee: typeof v.annee === "string" ? v.annee : "",
+      lu: v.lu === true,
+    };
+  } catch {
+    // A corrupted draft is worth less than a blank form; nothing to report.
+    return undefined;
+  }
+}
 
 /**
  * Book form: local validation by zod, server errors put back onto the fields.
@@ -49,8 +72,9 @@ type Options = {
  * first offending one takes focus. What matches no field does not disappear for
  * all that: it goes to the form-level error.
  */
-export function useBookForm({ book, save, onSaved }: Options) {
+export function useBookForm({ book, save, onSaved, brouillonCle }: Options) {
   const { t } = useTranslation();
+  const brouillon = useBrouillon(brouillonCle ?? "livre:aucun");
 
   const form: BookForm = useForm<BookFormValues, undefined, BookDraft>({
     resolver: zodResolver(BookFormSchema),
@@ -60,9 +84,30 @@ export function useBookForm({ book, save, onSaved }: Options) {
     mode: "onBlur",
   });
 
+  // A draft left on this workstation takes the place of the initial values,
+  // once, and only if the bookseller has not started typing over them.
+  const { reset, watch, formState } = form;
+  const stored = brouillonCle === undefined ? undefined : brouillon.valeur;
+  const restored = useRef(false);
+  useEffect(() => {
+    // Only the first value read from disk matters: later ones are our own writes.
+    if (restored.current || stored === undefined) return;
+    restored.current = true;
+    if (stored === "" || formState.isDirty) return;
+    const values = parseBrouillon(stored);
+    if (values !== undefined) reset(values, { keepDefaultValues: true });
+  }, [stored, formState.isDirty, reset]);
+
+  useEffect(() => {
+    if (brouillonCle === undefined) return;
+    const subscription = watch((values) => brouillon.ecrire(JSON.stringify(values)));
+    return () => subscription.unsubscribe();
+  }, [watch, brouillon, brouillonCle]);
+
   const submit = form.handleSubmit(async (draft) => {
     try {
       await save(draft);
+      if (brouillonCle !== undefined) await brouillon.effacer();
       onSaved();
     } catch (cause) {
       applyServerError(form, cause, t);

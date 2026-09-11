@@ -2,9 +2,11 @@ import { useQueryClient, type InfiniteData, type QueryKey } from "@tanstack/reac
 import { useCallback, useRef, useState } from "react";
 
 import type { Book, Page } from "@/domain";
-import { deleteBook } from "@/services/api/books";
 import { cancel, isPending, schedule, UNDO_DELAY_MS } from "@/services/mutations";
 import { bookKeys } from "@/services/queryKeys";
+import { ajouterMutation } from "@/services/sync/file";
+import { nouvelId } from "@/services/sync/mutation";
+import { planifierSync } from "@/services/sync/synchroniser";
 
 type ListData = InfiniteData<Page<Book>>;
 type ListSnapshot = [QueryKey, ListData | undefined][];
@@ -70,7 +72,19 @@ export function useDeleteBook({ onDeleted }: DeleteBookOptions = {}) {
 
       schedule({
         key: id,
-        run: () => deleteBook(id),
+        // Queued with the version on screen: a colleague's edit in the
+        // meantime comes back as a conflict rather than a silent loss.
+        run: async () => {
+          const version = queryClient.getQueryData<Book>(bookKeys.detail(id))?.version;
+          await ajouterMutation({
+            id: nouvelId(),
+            type: "delete",
+            creeLe: new Date().toISOString(),
+            livreId: id,
+            baseVersion: version === undefined || version === 0 ? undefined : version,
+          });
+          planifierSync(queryClient);
+        },
         onSettled: (cause) => {
           setPendingId((current) => (current === id ? undefined : current));
 
@@ -82,7 +96,9 @@ export function useDeleteBook({ onDeleted }: DeleteBookOptions = {}) {
 
           snapshots.current.delete(id);
           queryClient.removeQueries({ queryKey: bookKeys.detail(id) });
-          void queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
+          // The row is already gone; a refetch now would bring it back until
+          // the sync has run.
+          void queryClient.invalidateQueries({ queryKey: bookKeys.lists(), refetchType: "none" });
           onDeleted?.(id);
         },
       });

@@ -97,9 +97,9 @@ test.describe('The expired token', () => {
       await route.fulfill({ json: { accessToken: 'acces-neuf', expiresIn: '120s' } });
     });
 
-    // Refuses the old token, accepts the new one: the record is refused first,
-    // and the notes — which leave once the record is on screen — must already
-    // carry the refreshed token without a second round trip.
+    // Refuses the old token, accepts the new one. The record itself comes
+    // from the list already in the cache and leaves no request: the notes are
+    // what gets refused, refreshed and replayed.
     const expireOnce = async (route: Route, json: unknown) => {
       const bearer = route.request().headers()['authorization'] ?? '';
       bearers.push(bearer);
@@ -118,11 +118,10 @@ test.describe('The expired token', () => {
 
     await openRecord(page);
 
-    // Both replays landed: the record is on screen and the notes answered.
+    // The replay landed: the notes answered under the new token.
     await expect(page.getByText('Aucune note pour cet ouvrage')).toBeVisible();
     expect(refreshes).toBe(1);
-    expect(bearers[0]).toBe('Bearer acces-de-test');
-    expect(bearers.filter((b) => b === 'Bearer acces-neuf')).toHaveLength(2);
+    expect(bearers).toEqual(['Bearer acces-de-test', 'Bearer acces-neuf']);
     await expect(page).not.toHaveURL(/connexion/);
   });
 

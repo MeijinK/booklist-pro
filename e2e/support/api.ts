@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Page, type Route } from '@playwright/test';
 
 /**
  * The API, simulated by network interception.
@@ -112,7 +112,13 @@ export async function mockCollection(page: Page, total = 45): Promise<Traffic> {
 export async function mockRecord(page: Page, notes: NoteRecord[], entry = book(1)): Promise<void> {
   const held = [...notes];
 
-  await page.route('**/books/l-1', (route) => route.fulfill({ json: entry }));
+  await page.route('**/books/l-1', (route) =>
+    // The same path is also a page of the application: a reload must reach
+    // the static server, not the mock.
+    route.request().resourceType() === 'document'
+      ? route.fallback()
+      : route.fulfill({ json: entry }),
+  );
 
   await page.route('**/books/l-1/notes', async (route) => {
     if (route.request().method() === 'POST') {
@@ -197,4 +203,135 @@ export async function mockLogin(page: Page): Promise<void> {
       },
     });
   });
+}
+
+export type SyncMutation = {
+  id: string;
+  type: 'create' | 'update' | 'delete';
+  livre?: Record<string, unknown>;
+  livreId?: string;
+  baseVersion?: number;
+};
+
+export type SyncCall = { bearer: string; mutations: SyncMutation[] };
+
+export type SyncAnswer = { status?: number; json: unknown };
+
+/**
+ * POST /sync, answered by a handler the test controls. Every call is recorded
+ * with the bearer it carried, so a test can assert the same ids came back
+ * after a refresh.
+ */
+export async function mockSync(
+  page: Page,
+  answer: (call: SyncCall, index: number) => SyncAnswer,
+): Promise<SyncCall[]> {
+  const calls: SyncCall[] = [];
+
+  await page.route('**/sync', async (route) => {
+    const body = route.request().postDataJSON() as { mutations: SyncMutation[] };
+    const call = { bearer: route.request().headers()['authorization'] ?? '', mutations: body.mutations };
+    calls.push(call);
+    const { status = 200, json } = answer(call, calls.length - 1);
+    await route.fulfill({ status, json });
+  });
+
+  return calls;
+}
+
+/** The server accepts everything: each mutation echoes a plausible record. */
+export function acceptAll(call: SyncCall): SyncAnswer {
+  return {
+    json: {
+      resultats: call.mutations.map((m) => {
+        if (m.type === 'delete') return { id: m.id, statut: 'ok' };
+        const id = m.type === 'create' ? `srv-${m.id.slice(0, 8)}` : String(m.livre?.id);
+        return { id: m.id, statut: 'ok', livre: book(1, { ...m.livre, id, version: 2 }) };
+      }),
+      resume: {},
+      serveurLe: TIMESTAMP,
+    },
+  };
+}
+
+/** Serves one record whose current version the test can change mid-run. */
+export async function mockRecordMutable(
+  page: Page,
+  notes: NoteRecord[],
+  holder: { entry: BookRecord },
+): Promise<void> {
+  await mockRecord(page, notes, holder.entry);
+  await page.route('**/books/l-1', (route) =>
+    route.request().method() === 'GET' && route.request().resourceType() !== 'document'
+      ? route.fulfill({ json: holder.entry })
+      : route.fallback(),
+  );
+}
+
+export async function mockStats(page: Page): Promise<void> {
+  await page.route('**/stats', (route) =>
+    route.request().resourceType() === 'document'
+      ? route.fallback()
+      : route.fulfill({
+      json: {
+        total: 45,
+        lus: 15,
+        nonLus: 30,
+        favoris: 3,
+        moyenneNotes: 3.8,
+        totalNotes: 12,
+        distributionNotes: [
+          { note: 3, total: 4 },
+          { note: 5, total: 8 },
+        ],
+        parAnnee: [
+          { annee: 2001, total: 20 },
+          { annee: 2002, total: 25 },
+        ],
+        parAuteur: [],
+        genereLe: TIMESTAMP,
+      },
+    }),
+  );
+}
+
+const STATIC_HOST = '127.0.0.1:8082';
+const OFFLINE_FLAG = 'e2e.offline';
+
+const abortOffline = (route: Route) => route.abort('internetdisconnected');
+const notStatic = (url: URL) => url.host !== STATIC_HOST;
+
+/**
+ * The shop's connection drops, the way a till sees it: every request to the
+ * API fails, `navigator.onLine` says so, the browser fires `offline`. The
+ * static server stays reachable, so the page can still be reloaded — which is
+ * exactly what the persisted cache and the queue are there for. The flag in
+ * sessionStorage keeps the browser offline across that reload.
+ */
+export async function goOffline(page: Page): Promise<void> {
+  await page.route(notStatic, abortOffline);
+  await page.addInitScript((flag: string) => {
+    if (window.sessionStorage.getItem(flag) === '1') {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false });
+    }
+  }, OFFLINE_FLAG);
+  await page.evaluate((flag: string) => {
+    window.sessionStorage.setItem(flag, '1');
+    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false });
+    window.dispatchEvent(new Event('offline'));
+  }, OFFLINE_FLAG);
+}
+
+export async function goOnline(page: Page): Promise<void> {
+  await page.unroute(notStatic, abortOffline);
+  await page.evaluate((flag: string) => {
+    window.sessionStorage.removeItem(flag);
+    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true });
+    window.dispatchEvent(new Event('online'));
+  }, OFFLINE_FLAG);
+}
+
+/** The one instance of a header control that is on screen, stacked screens aside. */
+export function visible(page: Page, label: string) {
+  return page.getByLabel(label).filter({ visible: true });
 }

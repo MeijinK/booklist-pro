@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { signedIn } from './support/api';
+import { acceptAll, mockSync, signedIn } from './support/api';
 
 /**
  * Critical journey of batch 1, on target no. 1: the browser.
@@ -149,20 +149,18 @@ test.describe('The form', () => {
     await expect(page.getByText("L'annee de publication est obligatoire.")).toBeVisible();
   });
 
-  test('puts an API 422 error back on the right field', async ({ page }) => {
+  test('keeps an entry the server refuses, field errors included', async ({ page }) => {
     await mockApi(page);
-    await page.route('**/books', async (route) => {
-      if (route.request().method() !== 'POST') return route.fallback();
-
-      await route.fulfill({
-        status: 422,
-        json: {
-          erreur: 'validation',
-          message: 'Saisie refusee par le serveur.',
+    await mockSync(page, (call) => ({
+      json: {
+        resultats: call.mutations.map((m) => ({
+          id: m.id,
+          statut: 'erreur',
           champs: { editeur: "Cet editeur n'est pas reference." },
-        },
-      });
-    });
+        })),
+        resume: {},
+      },
+    }));
 
     await openBookForm(page);
     await page.getByLabel('Titre', { exact: true }).fill('Dune');
@@ -171,23 +169,21 @@ test.describe('The form', () => {
     await page.getByLabel('Annee de publication', { exact: true }).fill('1965');
     await page.getByRole('button', { name: 'Ajouter au fonds' }).click();
 
-    await expect(page.getByText("Cet editeur n'est pas reference.")).toBeVisible();
+    // The entry left the till and came back refused: it waits, whole, with
+    // the server's reason, where the bookseller can copy it back.
+    await page.getByLabel('1 conflit a traiter').click();
+    await page.getByText('Dune', { exact: true }).click();
+    await expect(page.getByText('Le serveur a refuse cette saisie')).toBeVisible();
+    await expect(page.getByText(/Cet editeur n'est pas reference/)).toBeVisible();
+    await expect(page.getByText('Frank Herbert')).toBeVisible();
   });
 });
 
 test.describe('Deletion', () => {
   test('leaves five seconds to change one\'s mind', async ({ page }) => {
-    let deletesSent = 0;
-
     await mockApi(page);
-    await page.route('**/books/l-1', async (route) => {
-      if (route.request().method() === 'DELETE') {
-        deletesSent += 1;
-        return route.fulfill({ status: 204, body: '' });
-      }
-
-      return route.fulfill({ json: book(1) });
-    });
+    const syncs = await mockSync(page, acceptAll);
+    await page.route('**/books/l-1', (route) => route.fulfill({ json: book(1) }));
 
     // We go through the list rather than a direct URL: the dynamic route does
     // not exist as a file in the static export.
@@ -203,8 +199,11 @@ test.describe('Deletion', () => {
     await undoButton.click();
     await expect(undoButton).toBeHidden();
 
-    // Undone before departure: nothing was ever sent to the server.
+    // Undone before departure: nothing was ever queued, nothing was sent.
     await page.waitForTimeout(6000);
-    expect(deletesSent).toBe(0);
+    expect(syncs).toHaveLength(0);
+    await expect(
+      page.getByLabel('En ligne, tout est synchronise').filter({ visible: true }),
+    ).toBeVisible();
   });
 });

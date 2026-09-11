@@ -2,6 +2,7 @@ import { Redirect, Stack, usePathname } from "expo-router";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { HeaderActions, useSession } from "@/features/session";
+import { SyncBootstrap } from "@/features/sync";
 import { useTranslation } from "@/i18n";
 import { paperTheme, useAppTheme } from "@/theme";
 
@@ -12,7 +13,7 @@ export const unstable_settings = { anchor: "index" };
  * screen with the path they asked for, and comes back to it once signed in.
  */
 export default function AppLayout() {
-  const { statut } = useSession();
+  const { statut, peutEcrire } = useSession();
   const pathname = usePathname();
   const { colors, scheme } = useAppTheme();
   const { t } = useTranslation();
@@ -36,23 +37,30 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.surfaceSunken },
-        headerTintColor: colors.accent,
-        headerTitleStyle: { ...theme.fonts.titleMedium, color: colors.textStrong },
-        headerShadowVisible: false,
-        contentStyle: { backgroundColor: colors.background },
-        // Reachable from every screen: the account and the appearance switch
-        // must not require navigating back to the collection.
-        headerRight: () => <HeaderActions />,
-      }}
-    >
-      <Stack.Screen name="index" options={{ title: t("screen.list") }} />
-      <Stack.Screen name="books/new" options={{ title: t("screen.new") }} />
-      <Stack.Screen name="books/[id]/index" options={{ title: t("screen.detail") }} />
-      <Stack.Screen name="books/[id]/edit" options={{ title: t("screen.edit") }} />
-    </Stack>
+    <>
+      {/* Only an editor has anything to replay; a reader's queue is empty. */}
+      {peutEcrire ? <SyncBootstrap /> : null}
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: colors.surfaceSunken },
+          headerTintColor: colors.accent,
+          headerTitleStyle: { ...theme.fonts.titleMedium, color: colors.textStrong },
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: colors.background },
+          // Reachable from every screen: the account and the appearance switch
+          // must not require navigating back to the collection.
+          headerRight: () => <HeaderActions />,
+        }}
+      >
+        <Stack.Screen name="index" options={{ title: t("screen.list") }} />
+        <Stack.Screen name="books/new" options={{ title: t("screen.new") }} />
+        <Stack.Screen name="books/[id]/index" options={{ title: t("screen.detail") }} />
+        <Stack.Screen name="books/[id]/edit" options={{ title: t("screen.edit") }} />
+        <Stack.Screen name="conflits/index" options={{ title: t("screen.conflicts") }} />
+        <Stack.Screen name="conflits/[id]" options={{ title: t("screen.merge") }} />
+        <Stack.Screen name="stats" options={{ title: t("screen.stats") }} />
+      </Stack>
+    </>
   );
 }
 

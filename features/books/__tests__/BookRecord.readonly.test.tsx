@@ -59,10 +59,11 @@ describe("BookRecord en lecture seule", () => {
     expect(screen.getByText("Dune")).toBeTruthy();
   });
 
-  it("les montre toutes a un titulaire", () => {
+  it("les montre toutes a un titulaire", async () => {
     renderRecord(false);
 
     expect(screen.getByText("Modifier la fiche")).toBeTruthy();
-    expect(screen.getByLabelText("Note de lecture")).toBeTruthy();
+    // The composer opens once the stored draft has been read.
+    expect(await screen.findByLabelText("Note de lecture")).toBeTruthy();
   });
 });

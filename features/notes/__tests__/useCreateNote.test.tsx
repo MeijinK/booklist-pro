@@ -7,6 +7,10 @@ import { isLocalNote, useCreateNote } from "@/features/notes/useCreateNote";
 import { useDeleteNote } from "@/features/notes/useDeleteNote";
 import { createQueryClient } from "@/services/queryClient";
 import { noteKeys } from "@/services/queryKeys";
+import { reinitialiserPourTests as resetReseau } from "@/services/reseau";
+import { lireFile, reinitialiserFilePourTests } from "@/services/sync/file";
+import { reinitialiserSyncPourTests } from "@/services/sync/synchroniser";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BASE = "http://localhost:3000";
 const BOOK = "l-1";
@@ -26,26 +30,39 @@ function cached(client: QueryClient): Note[] {
 const fetchMock = jest.fn<Promise<Response>, [string, RequestInit?]>();
 
 function setup<T>(hook: () => T, seeded: Note[]) {
-  const client = createQueryClient();
-  client.setQueryData<Note[]>(noteKeys.all(BOOK), seeded);
+  const created = createQueryClient();
+  client = created;
+  created.setQueryData<Note[]>(noteKeys.all(BOOK), seeded);
 
   function Wrapper({ children }: { children: ReactNode }) {
-    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+    return <QueryClientProvider client={created}>{children}</QueryClientProvider>;
   }
 
   const { result } = renderHook(hook, { wrapper: Wrapper });
-  return { client, result };
+  return { client: created, result };
 }
+
+let client: QueryClient | undefined;
 
 beforeEach(() => {
   process.env.EXPO_PUBLIC_API_URL = BASE;
   fetchMock.mockReset();
+  // The queue is local: with no server behind, the sync fails on transport
+  // and the queued note stays exactly where the hook put it.
+  fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
   global.fetch = fetchMock as unknown as typeof fetch;
 });
 
+afterEach(async () => {
+  client?.clear();
+  reinitialiserFilePourTests();
+  reinitialiserSyncPourTests();
+  resetReseau();
+  await AsyncStorage.clear();
+});
+
 describe("useCreateNote", () => {
-  it("shows the note before the server has recorded it", async () => {
-    fetchMock.mockResolvedValue(response(note("n-2", "Traduction inegale.")));
+  it("shows the note first, marked as local, and queues it", async () => {
     const { client, result } = setup(() => useCreateNote(BOOK), [note("n-1", "Deja la.")]);
 
     await act(async () => {
@@ -55,10 +72,13 @@ describe("useCreateNote", () => {
     await waitFor(() => expect(cached(client)).toHaveLength(2));
     // Most recent first: what has just been written is read first.
     expect(cached(client)[0]?.contenu).toBe("Traduction inegale.");
+    expect(isLocalNote(cached(client)[0] as Note)).toBe(true);
+    expect(lireFile()).toEqual([
+      expect.objectContaining({ type: "note", livreId: BOOK, contenu: "Traduction inegale." }),
+    ]);
   });
 
-  it("replaces the temporary note with the recorded one", async () => {
-    fetchMock.mockResolvedValue(response(note("n-2", "Traduction inegale.")));
+  it("keeps the note when the server is unreachable", async () => {
     const { client, result } = setup(() => useCreateNote(BOOK), []);
 
     await act(async () => {
@@ -67,23 +87,7 @@ describe("useCreateNote", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(cached(client)).toHaveLength(1);
-    expect(cached(client)[0]?.id).toBe("n-2");
-    expect(cached(client).some(isLocalNote)).toBe(false);
-  });
-
-  it("puts the list back as it was when the server refuses", async () => {
-    fetchMock.mockResolvedValue(
-      response({ erreur: "validation", champs: { contenu: "contenu obligatoire" } }, 422),
-    );
-    const { client, result } = setup(() => useCreateNote(BOOK), [note("n-1", "Deja la.")]);
-
-    await act(async () => {
-      result.current.mutate({ contenu: "Traduction inegale." });
-    });
-
-    await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(cached(client)).toHaveLength(1);
-    expect(cached(client)[0]?.id).toBe("n-1");
+    expect(lireFile()).toHaveLength(1);
   });
 });
 

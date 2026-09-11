@@ -7,16 +7,17 @@ import { BookDetailSkeleton } from "@/components/books/BookDetailSkeleton";
 import { BookEnrichment } from "@/components/books/BookEnrichment";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
-import { Notice } from "@/components/ui/Notice";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { UndoBar } from "@/components/ui/UndoBar";
 import { NoteSection } from "@/features/notes/NoteSection";
+import { useSync } from "@/features/sync/useSync";
 import { useTranslation } from "@/i18n";
 import { space, useAppTheme, useThemedStyles, type Palette } from "@/theme";
 
 import { useBook } from "./useBook";
 import { useBookEnrichment } from "./useBookEnrichment";
 import { useDeleteBook } from "./useDeleteBook";
-import { toggleRefusalKey, useToggleBook } from "./useToggleBook";
+import { useToggleBook } from "./useToggleBook";
 
 type Props = {
   id: string;
@@ -46,6 +47,7 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList, readOnly = fal
   const [confirming, setConfirming] = useState(false);
   const deletion = useDeleteBook({ onDeleted });
   const toggle = useToggleBook();
+  const { enLigne } = useSync();
 
   // Called before the early returns below, as every hook must be. The title is
   // only known once the record has loaded, so the lookup stays disabled until
@@ -54,7 +56,9 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList, readOnly = fal
 
   if (query.isPending) return <BookDetailSkeleton />;
 
-  if (query.isError) {
+  // A record read from the cache while the network is down is not an error
+  // screen: the bookseller opened it to read it.
+  if (query.isError && query.data === undefined) {
     const notFound = query.error.detail.kind === "notFound";
 
     return notFound ? (
@@ -74,6 +78,7 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList, readOnly = fal
   return (
     <View style={styles.block}>
       <ScrollView contentContainerStyle={styles.content}>
+        <OfflineBanner visible={query.isError && !enLigne} />
         {deletion.error === undefined ? null : <ErrorState banner error={deletion.error} />}
 
         <BookDetail
@@ -151,12 +156,6 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList, readOnly = fal
 
       {/* Never at the same time as the undo bar: two stacked snackbars hide
           each other, and losing a record weighs more than a refused heart. */}
-      {!undoPending && toggle.isError && toggle.variables !== undefined ? (
-        <Notice
-          message={t("toggle.refused", { action: t(toggleRefusalKey(toggle.variables.changes)) })}
-          onDismiss={toggle.reset}
-        />
-      ) : null}
     </View>
   );
 }

@@ -7,6 +7,9 @@ import { NoteListSkeleton } from "@/components/notes/NoteListSkeleton";
 import { NoteRow } from "@/components/notes/NoteRow";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
+import { estIdLocal } from "@/domain";
+import { useSync } from "@/features/sync/useSync";
 import { useTranslation } from "@/i18n";
 import { radius, space, useThemedStyles, type Palette } from "@/theme";
 
@@ -31,7 +34,12 @@ export function NoteSection({ bookId, readOnly = false }: Props) {
   const creation = useCreateNote(bookId);
   const deletion = useDeleteNote(bookId);
 
+  const { enLigne } = useSync();
+  // A book created on this workstation has no notes on the server yet: the
+  // query stays disabled and an absent cache means an empty list, not a wait.
   const notes = query.data ?? [];
+  const loading = query.isPending && !estIdLocal(bookId);
+  const empty = notes.length === 0 && (query.isSuccess || estIdLocal(bookId));
 
   const add = async (contenu: string): Promise<boolean> => {
     try {
@@ -60,19 +68,26 @@ export function NoteSection({ bookId, readOnly = false }: Props) {
       {creation.isError ? <ErrorState banner error={creation.error} /> : null}
       {deletion.isError ? <ErrorState banner error={deletion.error} /> : null}
 
-      {readOnly ? null : <NoteComposer onSubmit={add} sending={creation.isPending} />}
+      {readOnly ? null : (
+        <NoteComposer
+          brouillonCle={`note:${bookId}`}
+          onSubmit={add}
+          sending={creation.isPending}
+        />
+      )}
 
       {/* Announced as a list in every state, loading included: what is being
           awaited here is a list, and saying so early is what lets a screen
           reader place the wait. */}
       <View accessibilityLabel={t("notes.list")} accessibilityRole="list" style={styles.list}>
-        {query.isPending ? <NoteListSkeleton /> : null}
+        {loading ? <NoteListSkeleton /> : null}
 
-        {query.isError ? (
+        {query.isError && query.data === undefined ? (
           <ErrorState error={query.error} onRetry={() => void query.refetch()} />
         ) : null}
+        {query.isError && query.data !== undefined ? <OfflineBanner visible={!enLigne} /> : null}
 
-        {query.isSuccess && notes.length === 0 ? (
+        {empty ? (
           <EmptyState
             title={t("notes.empty.title")}
             description={t("notes.empty.description")}

@@ -1,6 +1,16 @@
 import { expect, test } from '@playwright/test';
 
-import { book, mockCollection, mockRecord, note, openBookList, openRecord, signedIn } from './support/api';
+import {
+  acceptAll,
+  book,
+  mockCollection,
+  mockRecord,
+  mockSync,
+  note,
+  openBookList,
+  openRecord,
+  signedIn,
+} from './support/api';
 
 /**
  * Batch 2 on target no. 1: what the team says about a book, and the two states
@@ -13,29 +23,30 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe('The coup de coeur', () => {
-  test('flips before the server answers, and holds when it accepts', async ({ page }) => {
+  test('flips before the server answers, and is sent as one update without a version', async ({
+    page,
+  }) => {
     await mockCollection(page);
-    await page.route('**/books/l-1', async (route) => {
-      if (route.request().method() !== 'PATCH') return route.fallback();
-      // Slow on purpose: the heart must have flipped well before this returns.
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      await route.fulfill({ json: book(1, { favori: true, version: 2 }) });
-    });
+    const syncs = await mockSync(page, acceptAll);
 
     await openBookList(page);
     const heart = page.getByRole('switch', { name: 'Coup de coeur, Ouvrage 1', exact: true });
 
     await heart.click();
     await expect(heart).toBeChecked({ timeout: 300 });
+
+    await expect(
+      page.getByLabel('En ligne, tout est synchronise').filter({ visible: true }),
+    ).toBeVisible();
+    expect(syncs).toHaveLength(1);
+    expect(syncs[0]?.mutations[0]).toMatchObject({ type: 'update', livre: { id: 'l-1', favori: true } });
+    expect(syncs[0]?.mutations[0]).not.toHaveProperty('baseVersion');
     await expect(heart).toBeChecked();
   });
 
-  test('comes back, and says so, when the server refuses', async ({ page }) => {
+  test('holds, and waits in the queue, when the server is down', async ({ page }) => {
     await mockCollection(page);
-    await page.route('**/books/l-1', async (route) => {
-      if (route.request().method() !== 'PATCH') return route.fallback();
-      await route.fulfill({ status: 503, json: { erreur: 'indisponible' } });
-    });
+    await mockSync(page, () => ({ status: 503, json: { erreur: 'indisponible' } }));
 
     await openBookList(page);
     const heart = page.getByRole('switch', { name: 'Coup de coeur, Ouvrage 1', exact: true });
@@ -43,21 +54,28 @@ test.describe('The coup de coeur', () => {
     await heart.click();
     await expect(heart).toBeChecked();
 
-    await expect(page.getByText(/Le serveur a refuse ce coup de coeur/)).toBeVisible();
-    await expect(heart).not.toBeChecked();
+    // Nothing is rolled back and nothing is lost: the change waits for the
+    // server, and the header says so.
+    await expect(
+      page.getByLabel('1 modification en attente. Synchroniser').filter({ visible: true }),
+    ).toBeVisible();
+    await expect(heart).toBeChecked();
   });
 });
 
 test.describe('Read status', () => {
   test('is flipped from the record, before the server answers', async ({ page }) => {
+    // The mock keeps what the sync accepted, the way the real server does:
+    // the record is re-read once the queue is empty.
+    const held = { entry: book(1, { lu: false }) };
     await mockCollection(page);
-    await page.route('**/books/l-1/notes', (route) => route.fulfill({ json: [] }));
-    await page.route('**/books/l-1', async (route) => {
-      if (route.request().method() === 'PATCH') {
-        return route.fulfill({ json: book(1, { lu: true, version: 2 }) });
-      }
-      return route.fulfill({ json: book(1, { lu: false }) });
+    await mockSync(page, (call) => {
+      const change = call.mutations[0]?.livre;
+      if (change !== undefined) held.entry = { ...held.entry, ...change, version: 2 };
+      return acceptAll(call);
     });
+    await page.route('**/books/l-1/notes', (route) => route.fulfill({ json: [] }));
+    await page.route('**/books/l-1', (route) => route.fulfill({ json: held.entry }));
 
     await openRecord(page);
     const status = page.getByRole('switch', { name: 'Statut de lecture' });

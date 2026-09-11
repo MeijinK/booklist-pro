@@ -59,10 +59,12 @@ function LoadedForm({ book, onSaved, onCancel }: LoadedFormProps) {
 
   const { form, submit } = useBookForm({
     book,
-    // The version that was read goes out as If-Match: if a colleague saved in
-    // the meantime, the server answers 409 rather than overwriting their work.
+    // The version that was read travels with the queued update: if a colleague
+    // saved in the meantime, the sync brings back a conflict to arbitrate
+    // rather than overwriting their work.
     save: (draft) => update.mutateAsync({ draft, version: book.version }),
     onSaved,
+    brouillonCle: `livre:${book.id}`,
   });
 
   return (

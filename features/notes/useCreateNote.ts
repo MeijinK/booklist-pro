@@ -1,73 +1,40 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { Note, NoteDraft } from "@/domain";
-import { createNote } from "@/services/api/notes";
-import { noteKeys } from "@/services/queryKeys";
+import { LOCAL_ID_PREFIX, type MutationLocale, type Note, type NoteDraft } from "@/domain";
+import { insererNote } from "@/services/sync/cache";
+import { ajouterMutation } from "@/services/sync/file";
+import { noteDepuisMutation, nouvelId } from "@/services/sync/mutation";
+import { planifierSync } from "@/services/sync/synchroniser";
 
-/** Distinguishes a note awaiting its server identifier from one that has it. */
-export const LOCAL_NOTE_PREFIX = "local:";
+export { LOCAL_ID_PREFIX };
 
+/** A note still waiting for its server identifier. */
 export function isLocalNote(note: Note): boolean {
-  return note.id.startsWith(LOCAL_NOTE_PREFIX);
+  return note.id.startsWith(LOCAL_ID_PREFIX);
 }
 
-/** Enough to tell two notes written in the same millisecond apart. */
-let localSequence = 0;
-
 /**
- * Writing a reading note.
- *
- * The note appears in the list before the round trip: the bookseller types
- * between two customers and must not wait on a shop connection to see what they
- * just wrote. The row stays marked as sending until the server confirms it,
- * then the temporary note is replaced by the recorded one, with its real
- * identifier and its server timestamp.
- *
- * A refusal puts the list back as it was and hands the text back to the caller,
- * which puts it back in the composer: rule no. 1 of the brief is that a
- * bookseller's input is never lost.
+ * Writing a reading note: queued and shown at once, marked as sending until
+ * the synchroniser replaces it with the recorded one. Cutting the network in
+ * the middle changes nothing for the bookseller: the note is on disk.
  */
 export function useCreateNote(bookId: string) {
   const queryClient = useQueryClient();
-  const key = noteKeys.all(bookId);
 
   return useMutation({
-    mutationFn: (draft: NoteDraft) => createNote(bookId, draft),
-
-    onMutate: async (draft) => {
-      // An in-flight read would land after our insertion and erase it.
-      await queryClient.cancelQueries({ queryKey: key });
-      const previous = queryClient.getQueryData<Note[]>(key);
-
-      localSequence += 1;
-      const optimistic: Note = {
-        id: `${LOCAL_NOTE_PREFIX}${localSequence}`,
+    mutationFn: async (draft: NoteDraft): Promise<Note> => {
+      const mutation: MutationLocale = {
+        id: nouvelId(),
+        type: "note",
+        creeLe: new Date().toISOString(),
         livreId: bookId,
         contenu: draft.contenu,
-        createdAt: new Date().toISOString(),
       };
-
-      queryClient.setQueryData<Note[]>(key, (notes) => [optimistic, ...(notes ?? [])]);
-
-      return { previous, optimisticId: optimistic.id };
-    },
-
-    onError: (_error, _draft, context) => {
-      if (context === undefined) return;
-      queryClient.setQueryData<Note[]>(key, context.previous);
-    },
-
-    onSuccess: (saved, _draft, context) => {
-      queryClient.setQueryData<Note[]>(key, (notes) => {
-        const settled = (notes ?? []).map((note) =>
-          note.id === context?.optimisticId ? saved : note,
-        );
-
-        // The temporary note may have disappeared with a cache cleared in the
-        // meantime. Dropping the recorded note here would hide a note the
-        // server holds, until the next full read.
-        return settled.some((note) => note.id === saved.id) ? settled : [saved, ...settled];
-      });
+      const note = noteDepuisMutation(mutation);
+      insererNote(queryClient, bookId, note);
+      await ajouterMutation(mutation);
+      planifierSync(queryClient);
+      return note;
     },
   });
 }
