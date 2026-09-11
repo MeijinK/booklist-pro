@@ -22,11 +22,25 @@ L'API de démonstration vit dans `api-books-v2/` (fournie, non modifiable) :
 
 ```bash
 cd api-books-v2 && npm install
-npm start          # lots 1-3, sans auth
-npm run auth       # lot 4 : rôles et jetons
+npm run seed       # 500 ouvrages et les deux comptes ci-dessous
+npm run auth       # rôles et jetons : le mode à utiliser depuis le lot 4
 npm run chaos      # 1,5 s de latence + 30 % d'échecs
 npm run final      # conditions de recette
 ```
+
+L'application demande toujours une connexion, quel que soit le mode du serveur. Comptes créés par le seed :
+
+| Email | Mot de passe | Rôle |
+| --- | --- | --- |
+| `editeur@booklist.fr` | `editeur123` | Libraire titulaire — lecture et écriture |
+| `lecteur@booklist.fr` | `lecteur123` | Lecture seule — aucune action d'écriture affichée |
+
+Parcours de recette du lot 4.1 :
+
+1. Ouvrir `http://localhost:8081/books/new` sans session : l'écran de connexion s'affiche, puis renvoie sur le formulaire une fois connecté.
+2. Laisser l'application ouverte plus de deux minutes, puis cliquer sur un cœur : aucun écran de connexion, un seul `POST /auth/refresh` dans l'onglet Réseau, la requête rejouée.
+3. Recharger la page : la session est conservée.
+4. Se déconnecter (menu du compte, en haut à droite), se connecter en `lecteur` : ni « Ajouter », ni cœur, ni composeur de note, ni « Modifier » / « Supprimer » ; `/books/new` renvoie sur le fonds.
 
 ## Scripts
 
@@ -56,6 +70,7 @@ le 8081 reste libre pour `npx expo start --web`, les deux peuvent donc tourner e
 - **Composants** — `components/__tests__/`, preset `jest-expo`, requêtes par rôle et par texte (jamais par structure DOM).
 - **Hooks de données** — `features/books/__tests__/`, `features/notes/__tests__/` : `fetch` simulé, pagination, écritures optimistes et retours arrière.
 - **Hooks génériques** — `hooks/__tests__/`, minuteurs simulés pour l'anti-rebond de la recherche.
+- **Session et jetons** — `services/auth/__tests__/`, `features/session/__tests__/` : coffre à jetons, rafraîchissement à vol unique (dix 401 simultanés, un seul `POST /auth/refresh`), rejeu, session perdue.
 - **Bout en bout** — `e2e/`, les parcours critiques dans un vrai navigateur sur le bundle réellement livré (`support/api.ts` porte les mocks partagés).
 
 ## Intégration continue
@@ -75,5 +90,5 @@ Les rapports de couverture et Playwright sont publiés en artefacts du run (7 jo
 
 - `PRODUCT.md` — utilisateurs, scène d'usage, principes et anti-références
 - `AGENTS.md` — règles d'architecture et contrat de qualité
-- `docs/ADR/` — décisions d'architecture, dont l'ADR 005 sur les écritures optimistes et la concurrence des bascules
+- `docs/ADR/` — décisions d'architecture, dont l'ADR 005 sur les écritures optimistes et l'ADR 006 sur la session, le stockage des jetons et le rafraîchissement
 - `docs/ARCHITECTURE.md`, `docs/PERFORMANCE.md`, `IA.md`

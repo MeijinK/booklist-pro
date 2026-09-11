@@ -1,15 +1,17 @@
 import { memo } from "react";
 import { StyleSheet, View } from "react-native";
-import { Chip, Divider, List } from "react-native-paper";
+import { Chip, Divider, Icon, List } from "react-native-paper";
 
 import { FavouriteButton } from "@/components/ui/FavouriteButton";
 import type { Book } from "@/domain";
-import { space } from "@/theme";
+import { space, useAppTheme } from "@/theme";
 
 type Props = {
   book: Book;
   onOpen: (id: string) => void;
   onToggleFavourite: (book: Book) => void;
+  /** A reader account: the heart is shown when set, never offered. */
+  readOnly?: boolean;
 };
 
 /**
@@ -27,7 +29,14 @@ type Props = {
  * coeur on a neighbour, redraws nothing here. The parent hands down callbacks
  * with a stable identity, which is what makes the comparison meaningful.
  */
-export const BookRow = memo(function BookRow({ book, onOpen, onToggleFavourite }: Props) {
+export const BookRow = memo(function BookRow({
+  book,
+  onOpen,
+  onToggleFavourite,
+  readOnly = false,
+}: Props) {
+  const { colors } = useAppTheme();
+
   return (
     <>
       <View style={styles.row}>
@@ -54,11 +63,19 @@ export const BookRow = memo(function BookRow({ book, onOpen, onToggleFavourite }
         />
 
         <View style={styles.heart}>
-          <FavouriteButton
-            favourite={book.favori}
-            title={book.titre}
-            onToggle={() => onToggleFavourite(book)}
-          />
+          {readOnly ? (
+            book.favori ? (
+              <View accessibilityLabel="Coup de coeur" style={styles.staticHeart}>
+                <Icon size={22} source="heart" color={colors.accent} />
+              </View>
+            ) : null
+          ) : (
+            <FavouriteButton
+              favourite={book.favori}
+              title={book.titre}
+              onToggle={() => onToggleFavourite(book)}
+            />
+          )}
         </View>
       </View>
       <Divider />
@@ -71,4 +88,6 @@ const styles = StyleSheet.create({
   entry: { flexShrink: 1, flexGrow: 1 },
   status: { alignSelf: "center" },
   heart: { paddingRight: space.sm },
+  /** Same footprint as the button, so rows keep their height in both modes. */
+  staticHeart: { alignItems: "center", height: 44, justifyContent: "center", width: 44 },
 });

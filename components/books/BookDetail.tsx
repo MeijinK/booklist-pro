@@ -13,6 +13,7 @@ type Props = {
   onToggleRead: (lu: boolean) => void;
   onToggleFavourite: (favori: boolean) => void;
   onRate: (note: number | null) => void;
+  readOnly?: boolean;
 };
 
 /**
@@ -22,7 +23,7 @@ type Props = {
  * form are raised as callbacks, so this component stays mountable as is in a
  * test, and the optimistic write keeps a single owner in features/books.
  */
-export function BookDetail({ book, onToggleRead, onToggleFavourite, onRate }: Props) {
+export function BookDetail({ book, onToggleRead, onToggleFavourite, readOnly = false, onRate }: Props) {
   const styles = useThemedStyles(makeStyles);
 
   return (
@@ -40,6 +41,7 @@ export function BookDetail({ book, onToggleRead, onToggleFavourite, onRate }: Pr
               label={book.lu ? "Lu" : "Non lu"}
               name="Statut de lecture"
               onToggle={onToggleRead}
+              readOnly={readOnly}
             />
             <ToggleControl
               checked={book.favori}
@@ -47,6 +49,7 @@ export function BookDetail({ book, onToggleRead, onToggleFavourite, onRate }: Pr
               label="Coup de coeur"
               name="Coup de coeur"
               onToggle={onToggleFavourite}
+              readOnly={readOnly}
             />
           </View>
         </View>

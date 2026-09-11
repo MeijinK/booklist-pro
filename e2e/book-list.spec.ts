@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { signedIn } from './support/api';
+
 /**
  * Critical journey of batch 1, on target no. 1: the browser.
  *
@@ -87,6 +89,11 @@ async function mockApi(page: Page): Promise<void> {
     });
   });
 }
+
+// Every journey here starts with a bookseller already signed in.
+test.beforeEach(async ({ page }) => {
+  await signedIn(page);
+});
 
 test.describe('The collection', () => {
   test('displays one page of the collection, not the whole collection', async ({ page }) => {
