@@ -78,6 +78,7 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList, readOnly = fal
           book={book}
           onToggleRead={(lu) => toggle.mutate({ id: book.id, changes: { lu } })}
           onToggleFavourite={(favori) => toggle.mutate({ id: book.id, changes: { favori } })}
+          onRate={(note) => toggle.mutate({ id: book.id, changes: { note } })}
           readOnly={readOnly}
         />
 
