@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { NO_ENRICHMENT, type BookEnrichment } from "@/domain";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { fetchEnrichment, type CoverSize } from "@/services/api/openlibrary";
+import { fetchEnrichment } from "@/services/api/openlibrary";
 import { enrichmentKeys } from "@/services/queryKeys";
 
 /**
@@ -15,7 +15,6 @@ const ENRICHMENT_STALE_TIME_MS = 24 * 60 * 60 * 1000;
 export type UseBookEnrichmentOptions = {
   /** Non-zero where the title is being typed; left at zero for a fixed title. */
   debounceMs?: number;
-  size?: CoverSize;
   enabled?: boolean;
 };
 
@@ -32,7 +31,7 @@ export function useBookEnrichment(title: string, options: UseBookEnrichmentOptio
 
   const query = useQuery({
     queryKey: enrichmentKeys.byTitle(debouncedTitle),
-    queryFn: ({ signal }) => fetchEnrichment(debouncedTitle, { signal, size: options.size }),
+    queryFn: ({ signal }) => fetchEnrichment(debouncedTitle, { signal }),
     enabled,
     staleTime: ENRICHMENT_STALE_TIME_MS,
     gcTime: ENRICHMENT_STALE_TIME_MS,

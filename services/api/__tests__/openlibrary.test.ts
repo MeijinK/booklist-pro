@@ -1,5 +1,5 @@
 import { NO_ENRICHMENT } from "@/domain";
-import { fetchEnrichment, openLibraryCoverUrl } from "@/services/api/openlibrary";
+import { fetchEnrichment } from "@/services/api/openlibrary";
 
 function jsonResponse(status: number, body: unknown): Response {
   return {
@@ -20,23 +20,13 @@ afterEach(() => {
   global.fetch = realFetch;
 });
 
-describe("openLibraryCoverUrl", () => {
-  it("addresses a cover by its numeric id, the form that is not rate-limited", () => {
-    expect(openLibraryCoverUrl(12345)).toBe("https://covers.openlibrary.org/b/id/12345-M.jpg");
-  });
-
-  it("honours the requested size", () => {
-    expect(openLibraryCoverUrl(12345, "L")).toBe("https://covers.openlibrary.org/b/id/12345-L.jpg");
-  });
-});
-
 describe("fetchEnrichment", () => {
   it("reduces a full answer to what the counter needs", async () => {
     stubFetch(
       jest.fn().mockResolvedValue(
         jsonResponse(200, {
           numFound: 42,
-          docs: [{ title: "The Hobbit", first_publish_year: 1937, cover_i: 8231856 }],
+          docs: [{ title: "The Hobbit", first_publish_year: 1937 }],
         }),
       ),
     );
@@ -44,7 +34,6 @@ describe("fetchEnrichment", () => {
     await expect(fetchEnrichment("The Hobbit")).resolves.toEqual({
       editionCount: 42,
       firstPublishYear: 1937,
-      coverUrl: "https://covers.openlibrary.org/b/id/8231856-M.jpg",
     });
   });
 
@@ -54,17 +43,14 @@ describe("fetchEnrichment", () => {
     await expect(fetchEnrichment("Ouvrage saisi a la va-vite")).resolves.toEqual(NO_ENRICHMENT);
   });
 
-  it("keeps the edition count when the referenced work has no cover", async () => {
+  it("keeps the edition count when the referenced work has no publication year", async () => {
     stubFetch(
-      jest.fn().mockResolvedValue(
-        jsonResponse(200, { numFound: 3, docs: [{ title: "Sans jaquette", first_publish_year: 1980 }] }),
-      ),
+      jest.fn().mockResolvedValue(jsonResponse(200, { numFound: 3, docs: [{ title: "Sans date" }] })),
     );
 
-    await expect(fetchEnrichment("Sans jaquette")).resolves.toEqual({
+    await expect(fetchEnrichment("Sans date")).resolves.toEqual({
       editionCount: 3,
-      firstPublishYear: 1980,
-      coverUrl: null,
+      firstPublishYear: null,
     });
   });
 
@@ -117,14 +103,14 @@ describe("fetchEnrichment", () => {
     expect(calls).not.toHaveBeenCalled();
   });
 
-  it("requests a single result and only the three fields it displays", async () => {
+  it("requests a single result and only the fields it displays", async () => {
     const calls = stubFetch(jest.fn().mockResolvedValue(jsonResponse(200, { numFound: 0, docs: [] })));
 
     await fetchEnrichment("The Hobbit");
 
     const [url] = calls.mock.calls[0] as [string];
     expect(url).toContain("limit=1");
-    expect(url).toContain("fields=title%2Cfirst_publish_year%2Ccover_i");
+    expect(url).toContain("fields=title%2Cfirst_publish_year");
     expect(url).toContain("title=The+Hobbit");
   });
 });
