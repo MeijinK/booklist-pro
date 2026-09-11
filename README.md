@@ -42,6 +42,36 @@ Parcours de recette du lot 4.1 :
 3. Recharger la page : la session est conservée.
 4. Se déconnecter (menu du compte, en haut à droite), se connecter en `lecteur` : ni « Ajouter », ni cœur, ni composeur de note, ni « Modifier » / « Supprimer » ; `/books/new` renvoie sur le fonds.
 
+### Recette hors ligne (lot 4.6)
+
+Conditions de l'évaluation : `npm run final` côté API (auth + chaos). L'indicateur en haut à
+droite dit en permanence où en est le poste : *En ligne*, *Hors ligne*, *N modifications en
+attente* (toucher = synchroniser), *N conflits à traiter* (rouge, toucher = les traiter).
+
+1. Se connecter en `editeur@booklist.fr`. Ouvrir le fonds, puis DevTools → Réseau → **Offline**.
+2. « Ajouter » : créer un ouvrage. Il apparaît en tête de liste, l'indicateur passe à *1 modification en attente*.
+3. Ouvrir « Ouvrage X », « Modifier la fiche », changer le titre, « Enregistrer ». *2 modifications en attente*.
+4. Pendant ce temps, côté serveur, modifier le même ouvrage (le jeton s'obtient par `POST /auth/login`) :
+
+   ```bash
+   TOKEN=$(curl -s -X POST http://localhost:3000/auth/login -H "Content-Type: application/json" \
+     -d '{"email":"editeur@booklist.fr","motDePasse":"editeur123"}' | node -pe 'JSON.parse(require("fs").readFileSync(0)).accessToken')
+   curl -X PATCH http://localhost:3000/books/<ID> -H "Content-Type: application/json" \
+     -H "Authorization: Bearer $TOKEN" -d '{"titre":"Modifié par le serveur"}'
+   ```
+
+5. Attendre plus de 120 secondes : le jeton d'accès de l'application a expiré.
+6. Repasser **Online**. Dans l'onglet Réseau : `POST /sync` → 401, `POST /auth/refresh`, `POST /sync` rejoué avec les mêmes `id`.
+
+Attendu : l'ouvrage créé n'existe qu'une fois (le second lot répond `rejeu: true`), l'indicateur
+passe à *1 conflit à traiter*, l'écran de fusion montre *Votre version* / *Version serveur*
+champ par champ, « Appliquer la fusion » renvoie un `update` avec `baseVersion` = version
+serveur, et rien n'a été perdu. Recharger la page en cours de route ne change rien : file,
+conflits et brouillons sont sur disque.
+
+Le tableau de bord (icône graphique dans l'en-tête, ou menu du compte) reste consultable hors
+ligne avec la date de dernière mise à jour.
+
 ## Scripts
 
 | Commande | Rôle |
@@ -90,5 +120,5 @@ Les rapports de couverture et Playwright sont publiés en artefacts du run (7 jo
 
 - `PRODUCT.md` — utilisateurs, scène d'usage, principes et anti-références
 - `AGENTS.md` — règles d'architecture et contrat de qualité
-- `docs/ADR/` — décisions d'architecture, dont l'ADR 005 sur les écritures optimistes et l'ADR 006 sur la session, le stockage des jetons et le rafraîchissement
+- `docs/ADR/` — décisions d'architecture, dont l'ADR 005 sur les écritures optimistes, l'ADR 006 sur la session et les jetons, l'ADR 007 sur le mode hors ligne et la file de mutations, l'ADR 008 sur la fusion assistée des conflits
 - `docs/ARCHITECTURE.md`, `docs/PERFORMANCE.md`, `IA.md`
