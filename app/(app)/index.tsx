@@ -1,6 +1,6 @@
 import { Stack, useRouter } from "expo-router";
 import { useCallback } from "react";
-import { Button } from "react-native-paper";
+import { Button, IconButton } from "react-native-paper";
 
 import { BookList } from "@/features/books/BookList";
 import { HeaderActions, useSession } from "@/features/session";
@@ -33,6 +33,11 @@ export default function BookListScreen() {
           // itself rather than dropping them.
           headerRight: () => (
             <HeaderActions>
+              <IconButton
+                accessibilityLabel={t("screen.stats")}
+                icon="chart-box-outline"
+                onPress={() => router.push("/stats")}
+              />
               {/* Absent, not greyed, for a reader account. Without an explicit
                   label, the icon glyph ends up in the button's accessible name
                   and gets read out loud. */}
