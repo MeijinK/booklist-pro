@@ -10,11 +10,12 @@ import { ListFooter } from "@/components/books/ListFooter";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Notice } from "@/components/ui/Notice";
 import { DEFAULT_LIMIT, type Book } from "@/domain";
+import { useTranslation } from "@/i18n";
 import { useThemedStyles, type Palette } from "@/theme";
 
 import { isNarrowed, useBookQuery } from "./useBookQuery";
 import { useBooks } from "./useBooks";
-import { toggleRefusalMessage, useToggleBook } from "./useToggleBook";
+import { toggleRefusalKey, useToggleBook } from "./useToggleBook";
 
 type Props = {
   onOpen: (id: string) => void;
@@ -38,6 +39,7 @@ export function BookList({ onOpen, onCreate }: Props) {
   const query = useBooks(criteria.filters);
   const toggle = useToggleBook();
   const styles = useThemedStyles(makeStyles);
+  const { t } = useTranslation();
 
   const books = useMemo(
     () => query.data?.pages.flatMap((page) => page.items) ?? [],
@@ -129,7 +131,10 @@ export function BookList({ onOpen, onCreate }: Props) {
       ) : null}
 
       {toggle.isError && toggle.variables !== undefined ? (
-        <Notice message={toggleRefusalMessage(toggle.variables.changes)} onDismiss={toggle.reset} />
+        <Notice
+          message={t("toggle.refused", { action: t(toggleRefusalKey(toggle.variables.changes)) })}
+          onDismiss={toggle.reset}
+        />
       ) : null}
     </View>
   );
