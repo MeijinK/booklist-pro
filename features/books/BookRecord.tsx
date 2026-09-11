@@ -4,6 +4,7 @@ import { Button, Dialog, Portal, Text } from "react-native-paper";
 
 import { BookDetail } from "@/components/books/BookDetail";
 import { BookDetailSkeleton } from "@/components/books/BookDetailSkeleton";
+import { BookEnrichment } from "@/components/books/BookEnrichment";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Notice } from "@/components/ui/Notice";
@@ -12,6 +13,7 @@ import { NoteSection } from "@/features/notes/NoteSection";
 import { space, useAppTheme, useThemedStyles, type Palette } from "@/theme";
 
 import { useBook } from "./useBook";
+import { useBookEnrichment } from "./useBookEnrichment";
 import { useDeleteBook } from "./useDeleteBook";
 import { toggleRefusalMessage, useToggleBook } from "./useToggleBook";
 
@@ -43,6 +45,11 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList, readOnly = fal
   const deletion = useDeleteBook({ onDeleted });
   const toggle = useToggleBook();
 
+  // Called before the early returns below, as every hook must be. The title is
+  // only known once the record has loaded, so the lookup stays disabled until
+  // then rather than being moved out of the render path.
+  const enrichment = useBookEnrichment(query.data?.titre ?? "", { enabled: query.isSuccess });
+
   if (query.isPending) return <BookDetailSkeleton />;
 
   if (query.isError) {
@@ -72,6 +79,15 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList, readOnly = fal
           onToggleRead={(lu) => toggle.mutate({ id: book.id, changes: { lu } })}
           onToggleFavourite={(favori) => toggle.mutate({ id: book.id, changes: { favori } })}
           readOnly={readOnly}
+        />
+
+        {/* Complementary information, after the shop's own data and before the
+            notes: it informs a recommendation, it is never what the record is
+            about. */}
+        <BookEnrichment
+          editionCount={enrichment.enrichment.editionCount}
+          firstPublishYear={enrichment.enrichment.firstPublishYear}
+          loading={enrichment.isFetching}
         />
 
         {/* The notes come before the administrative actions: they are what the
