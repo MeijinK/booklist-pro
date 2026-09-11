@@ -59,3 +59,16 @@ export {
   type SortOrder
 } from "./filters";
 
+export {
+  ConnexionSchema,
+  peutEcrire,
+  ROLE_LABELS,
+  ROLES,
+  RoleSchema,
+  UtilisateurSchema,
+  type ConnexionValues,
+  type Role,
+  type Utilisateur
+} from "./utilisateur";
+
+export { retourSur, type RaisonDeconnexion } from "./session";
