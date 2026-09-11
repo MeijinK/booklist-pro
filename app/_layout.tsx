@@ -7,16 +7,19 @@ import { PaperProvider } from "react-native-paper";
 import type { Settings } from "react-native-paper/lib/typescript/core/settings";
 
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { ThemeMenu } from "@/components/ui/ThemeMenu";
+import { SessionProvider } from "@/features/session";
 import { createQueryClient } from "@/services/queryClient";
 import { paperTheme, ThemeProvider, useAppTheme } from "@/theme";
 
-export const unstable_settings = { anchor: "index" };
+export const unstable_settings = { anchor: "(app)" };
 
 /**
  * Everything below the theme provider, so that the palette and Paper's theme
  * both follow the current scheme. Kept apart because a provider cannot consume
  * its own context.
+ *
+ * The root stack only tells the login screen and the protected group apart;
+ * the headers live in the group, where every screen has a session.
  */
 function ThemedApp() {
   const { colors, scheme } = useAppTheme();
@@ -42,21 +45,10 @@ function ThemedApp() {
   return (
     <PaperProvider theme={theme} settings={paperSettings}>
       <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: colors.surfaceSunken },
-          headerTintColor: colors.accent,
-          headerTitleStyle: { ...theme.fonts.titleMedium, color: colors.textStrong },
-          headerShadowVisible: false,
-          contentStyle: { backgroundColor: colors.background },
-          // Reachable from every screen: a bookseller who finds the glare
-          // unbearable should not have to navigate back to fix it.
-          headerRight: () => <ThemeMenu />,
-        }}
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
       >
-        <Stack.Screen name="index" options={{ title: "Le fonds" }} />
-        <Stack.Screen name="books/new" options={{ title: "Nouvel ouvrage" }} />
-        <Stack.Screen name="books/[id]/index" options={{ title: "Fiche" }} />
-        <Stack.Screen name="books/[id]/edit" options={{ title: "Corriger la fiche" }} />
+        <Stack.Screen name="connexion" />
+        <Stack.Screen name="(app)" />
       </Stack>
       {/* Follows the scheme: a dark status bar over a dark header is unreadable. */}
       <StatusBar style={scheme === "dark" ? "light" : "dark"} />
@@ -76,7 +68,9 @@ export default function RootLayout() {
     <ErrorBoundary>
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
-          <ThemedApp />
+          <SessionProvider>
+            <ThemedApp />
+          </SessionProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </ErrorBoundary>

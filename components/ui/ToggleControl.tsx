@@ -12,6 +12,8 @@ type Props = {
   /** Filled glyph when on, hollow when off. */
   icon: { on: string; off: string };
   onToggle: (next: boolean) => void;
+  /** Shows the state as a fact, with no control: a reader account. */
+  readOnly?: boolean;
 };
 
 /**
@@ -25,9 +27,42 @@ type Props = {
  * and the state travels separately. Whoever hears "statut de lecture, coche"
  * gets the same thing as whoever reads "Lu" in a filled box.
  */
-export function ToggleControl({ checked, label, name, icon, onToggle }: Props) {
+export function ToggleControl({
+  checked,
+  label,
+  name,
+  icon,
+  onToggle,
+  readOnly = false,
+}: Props) {
   const styles = useThemedStyles(makeStyles);
   const { colors } = useAppTheme();
+
+  const content = (
+    <View style={styles.content}>
+      <Icon
+        size={20}
+        source={checked ? icon.on : icon.off}
+        color={checked ? colors.accent : colors.textMuted}
+      />
+      <Text variant="labelLarge" style={checked ? styles.labelOn : styles.labelOff}>
+        {label}
+      </Text>
+    </View>
+  );
+
+  if (readOnly) {
+    // Same box, same glyph, no role: what the team decided is still shown,
+    // and nothing announces a switch that a reader account cannot flip.
+    return (
+      <View
+        accessibilityLabel={`${name} : ${label}`}
+        style={[styles.control, checked ? styles.on : styles.off]}
+      >
+        {content}
+      </View>
+    );
+  }
 
   return (
     <TouchableRipple
@@ -42,16 +77,7 @@ export function ToggleControl({ checked, label, name, icon, onToggle }: Props) {
       onPress={() => onToggle(!checked)}
       style={[styles.control, checked ? styles.on : styles.off]}
     >
-      <View style={styles.content}>
-        <Icon
-          size={20}
-          source={checked ? icon.on : icon.off}
-          color={checked ? colors.accent : colors.textMuted}
-        />
-        <Text variant="labelLarge" style={checked ? styles.labelOn : styles.labelOff}>
-          {label}
-        </Text>
-      </View>
+      {content}
     </TouchableRipple>
   );
 }

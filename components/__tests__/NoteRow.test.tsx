@@ -69,4 +69,11 @@ describe("NoteRow", () => {
     // spinner, and it is what the bookseller just wrote.
     expect(screen.getByText(NOTE.contenu)).toBeTruthy();
   });
+
+  it("n'offre pas de suppression quand aucune n'est possible", () => {
+    renderWithTheme(<NoteRow note={NOTE} sending={false} />);
+
+    expect(screen.queryByLabelText(/Supprimer la note/)).toBeNull();
+    expect(screen.getByText(NOTE.contenu)).toBeTruthy();
+  });
 });

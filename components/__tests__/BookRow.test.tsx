@@ -83,4 +83,18 @@ describe("BookRow", () => {
     // The heart sits outside the row's pressable area: a tap must not navigate.
     expect(onOpen).not.toHaveBeenCalled();
   });
+
+  it("en lecture seule, n'offre pas le coup de coeur mais le montre", () => {
+    renderWithTheme(
+      <BookRow
+        book={{ ...BOOK, favori: true }}
+        onOpen={jest.fn()}
+        onToggleFavourite={jest.fn()}
+        readOnly
+      />,
+    );
+
+    expect(screen.queryByRole("switch")).toBeNull();
+    expect(screen.getByLabelText("Coup de coeur")).toBeTruthy();
+  });
 });

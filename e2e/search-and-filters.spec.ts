@@ -1,11 +1,16 @@
 import { expect, test } from '@playwright/test';
 
-import { lastQuery, mockCollection, openBookList, SEARCH_LABEL } from './support/api';
+import { SEARCH_LABEL, lastQuery, mockCollection, openBookList, signedIn } from './support/api';
 
 /**
  * Batch 2 on target no. 1: narrowing five hundred books to the handful that
  * answer a customer's question, without ever narrowing them on the client.
  */
+
+// Every journey here starts with a bookseller already signed in.
+test.beforeEach(async ({ page }) => {
+  await signedIn(page);
+});
 
 test.describe('Search', () => {
   test('sends one request for a word, not one per letter', async ({ page }) => {
