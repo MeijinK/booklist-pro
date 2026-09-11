@@ -72,3 +72,24 @@ export {
 } from "./utilisateur";
 
 export { retourSur, type RaisonDeconnexion } from "./session";
+
+export {
+  ChampsLivreSchema,
+  ConflitSchema,
+  estIdLocal,
+  LivreCreationSchema,
+  LOCAL_ID_PREFIX,
+  MutationLocaleSchema,
+  ReponseSyncSchema,
+  ResultatSyncSchema,
+  type ChampsLivre,
+  type Conflit,
+  type LivreCreation,
+  type MutationLivre,
+  type MutationLocale,
+  type MutationNote,
+  type ReponseSync,
+  type ResultatSync
+} from "./sync";
+
+export { anneesRecentes, sansNote, StatsSchema, type Stats } from "./stats";

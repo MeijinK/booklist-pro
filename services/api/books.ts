@@ -4,6 +4,7 @@ import {
   type Book,
   type BookDraft,
   type BookFilters,
+  type ChampsLivre,
   type Page,
 } from "@/domain";
 
@@ -12,9 +13,7 @@ import { request, requestNoContent } from "./client";
 const BookPageSchema = pageSchema(BookSchema);
 
 /** Fields a PATCH can change, where PUT requires the full representation. */
-export type BookPatch = Partial<
-  Pick<Book, "titre" | "auteur" | "editeur" | "annee" | "lu" | "favori" | "note">
->;
+export type BookPatch = ChampsLivre;
 
 /**
  * Builds the GET /books query string.
