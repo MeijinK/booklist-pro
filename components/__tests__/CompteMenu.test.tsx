@@ -17,4 +17,24 @@ describe("CompteMenu", () => {
     fireEvent.press(screen.getByText("Se deconnecter"));
     expect(onDeconnexion).toHaveBeenCalledTimes(1);
   });
+
+  it("demande confirmation quand des modifications attendent encore", () => {
+    const onDeconnexion = jest.fn();
+    renderWithTheme(
+      <CompteMenu
+        email="editeur@booklist.fr"
+        role="editeur"
+        enAttente={2}
+        onDeconnexion={onDeconnexion}
+      />,
+    );
+
+    fireEvent.press(screen.getByLabelText("Compte : editeur@booklist.fr"));
+    fireEvent.press(screen.getByText("Se deconnecter"));
+    expect(onDeconnexion).not.toHaveBeenCalled();
+    expect(screen.getByText(/2 modifications ne sont pas encore synchronisees/)).toBeTruthy();
+
+    fireEvent.press(screen.getByText("Se deconnecter quand meme"));
+    expect(onDeconnexion).toHaveBeenCalledTimes(1);
+  });
 });
