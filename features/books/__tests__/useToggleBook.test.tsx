@@ -6,6 +6,10 @@ import type { Book, Page } from "@/domain";
 import { useToggleBook } from "@/features/books/useToggleBook";
 import { createQueryClient } from "@/services/queryClient";
 import { bookKeys } from "@/services/queryKeys";
+import { reinitialiserPourTests as resetReseau } from "@/services/reseau";
+import { lireFile, reinitialiserFilePourTests } from "@/services/sync/file";
+import { reinitialiserSyncPourTests } from "@/services/sync/synchroniser";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BASE = "http://localhost:3000";
 
@@ -44,67 +48,59 @@ function listed(client: QueryClient, id: string): Book | undefined {
   return data?.pages[0]?.items.find((entry) => entry.id === id);
 }
 
-function response(body: unknown, status = 200): Response {
-  return { ok: status >= 200 && status < 300, status, json: async () => body } as Response;
-}
-
-/**
- * A request held open on purpose, then released.
- *
- * A promise that never settles would leave the mutation pending when the test
- * ends and hang the runner; this one lets the assertion happen mid-flight and
- * still hands the request back its answer.
- */
-function heldRequest() {
-  let release!: (value: Response) => void;
-  const promise = new Promise<Response>((resolve) => {
-    release = resolve;
-  });
-
-  return { promise, release };
-}
-
 const fetchMock = jest.fn<Promise<Response>, [string, RequestInit?]>();
 
 function setup() {
-  const client = createQueryClient();
-  seed(client, book());
+  const created = createQueryClient();
+  client = created;
+  seed(created, book());
 
   function Wrapper({ children }: { children: ReactNode }) {
-    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+    return <QueryClientProvider client={created}>{children}</QueryClientProvider>;
   }
 
   const { result } = renderHook(() => useToggleBook(), { wrapper: Wrapper });
-  return { client, result };
+  return { client: created, result };
 }
+
+let client: QueryClient | undefined;
 
 beforeEach(() => {
   process.env.EXPO_PUBLIC_API_URL = BASE;
   fetchMock.mockReset();
+  // No server behind the queue in these tests: the sync fails on transport
+  // and leaves the queue exactly as the hook wrote it.
+  fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
   global.fetch = fetchMock as unknown as typeof fetch;
 });
 
+afterEach(async () => {
+  client?.clear();
+  reinitialiserFilePourTests();
+  reinitialiserSyncPourTests();
+  resetReseau();
+  await AsyncStorage.clear();
+});
+
 describe("useToggleBook", () => {
-  it("flips the state before the server has answered", async () => {
-    const held = heldRequest();
-    fetchMock.mockReturnValue(held.promise);
+  it("applies the change to the list and the record, and queues one update", async () => {
     const { client, result } = setup();
 
     await act(async () => {
       result.current.mutate({ id: "l-1", changes: { favori: true } });
     });
 
-    // The request has not answered yet: what is asserted is the screen the
-    // bookseller sees while it travels.
-    await waitFor(() => expect(listed(client, "l-1")?.favori).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(listed(client, "l-1")?.favori).toBe(true);
     expect(client.getQueryData<Book>(bookKeys.detail("l-1"))?.favori).toBe(true);
-
-    await act(async () => held.release(response(book({ favori: true, version: 4 }))));
+    expect(lireFile()).toEqual([
+      expect.objectContaining({ type: "update", livreId: "l-1", champs: { favori: true } }),
+    ]);
+    // No version: a boolean toggle contradicts no correction.
+    expect(lireFile()[0]).not.toHaveProperty("baseVersion");
   });
 
   it("leaves the other books of the page untouched", async () => {
-    const held = heldRequest();
-    fetchMock.mockReturnValue(held.promise);
     const { client, result } = setup();
     const neighbour = listed(client, "l-2");
 
@@ -116,61 +112,31 @@ describe("useToggleBook", () => {
     // Same object, not merely an equal one: this identity is what lets the
     // memoised row skip its redraw.
     expect(listed(client, "l-2")).toBe(neighbour);
-
-    await act(async () => held.release(response(book({ favori: true, version: 4 }))));
   });
 
-  it("puts the previous state back when the server refuses", async () => {
-    fetchMock.mockResolvedValue(response({ erreur: "indisponible" }, 503));
-    const { client, result } = setup();
+  it("folds two toggles on the same book into one queued update", async () => {
+    const { result } = setup();
 
     await act(async () => {
       result.current.mutate({ id: "l-1", changes: { favori: true } });
     });
+    await act(async () => {
+      result.current.mutate({ id: "l-1", changes: { lu: true } });
+    });
 
-    await waitFor(() => expect(result.current.isError).toBe(true), { timeout: 10_000 });
-    expect(listed(client, "l-1")?.favori).toBe(false);
-    expect(client.getQueryData<Book>(bookKeys.detail("l-1"))?.favori).toBe(false);
+    await waitFor(() => expect(lireFile()).toHaveLength(1));
+    expect(lireFile()[0]).toMatchObject({ champs: { favori: true, lu: true } });
   });
 
-  it("writes back the record the server returns, version included", async () => {
-    fetchMock.mockResolvedValue(response(book({ lu: true, version: 4 })));
+  it("keeps the change and the queue when the server is unreachable", async () => {
     const { client, result } = setup();
 
     await act(async () => {
       result.current.mutate({ id: "l-1", changes: { lu: true } });
     });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(client.getQueryData<Book>(bookKeys.detail("l-1"))?.version).toBe(4);
-    expect(listed(client, "l-1")?.version).toBe(4);
-  });
-
-  it("does not send a version: a boolean toggle contradicts no correction", async () => {
-    fetchMock.mockResolvedValue(response(book({ favori: true, version: 4 })));
-    const { result } = setup();
-
-    await act(async () => {
-      result.current.mutate({ id: "l-1", changes: { favori: true } });
-    });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    const headers = (fetchMock.mock.calls[0]?.[1]?.headers ?? {}) as Record<string, string>;
-    expect(headers["If-Match"]).toBeUndefined();
-    expect(fetchMock.mock.calls[0]?.[1]?.method).toBe("PATCH");
-  });
-
-  it("does not refetch the lists on success, so the row stays under the finger", async () => {
-    fetchMock.mockResolvedValue(response(book({ favori: true, version: 4 })));
-    const { result } = setup();
-
-    await act(async () => {
-      result.current.mutate({ id: "l-1", changes: { favori: true } });
-    });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    // One call: the PATCH. A list refetch would make a book leave the screen
-    // the moment its coup de coeur is removed under a "coups de coeur" filter.
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(listed(client, "l-1")?.lu).toBe(true);
+    expect(lireFile()).toHaveLength(1);
   });
 });

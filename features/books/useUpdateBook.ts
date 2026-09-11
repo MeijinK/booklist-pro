@@ -1,34 +1,38 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { BookDraft } from "@/domain";
-import { replaceBook } from "@/services/api/books";
-import { bookKeys } from "@/services/queryKeys";
+import { estIdLocal, type BookDraft } from "@/domain";
+import { ecrireLivre } from "@/services/sync/cache";
+import { ajouterMutation } from "@/services/sync/file";
+import { nouvelId } from "@/services/sync/mutation";
+import { planifierSync } from "@/services/sync/synchroniser";
 
 export type UpdateBookInput = {
   draft: BookDraft;
-  /** Version read on the loaded record; goes out as If-Match to detect a conflict. */
+  /** Version read on the loaded record; goes out as `baseVersion` to detect a conflict. */
   version: number;
 };
 
 /**
- * Update of a book.
- *
- * The server returns the up-to-date record: we write it straight into the cache
- * rather than asking for it again. The lists, on the other hand, are
- * invalidated — changing a title moves the book within the sort order, hence
- * potentially onto another page.
- *
- * A 409 bubbles up as is in the form of a ConflictError carrying the server
- * record. Arbitration is not done here: that is the subject of batch 4.
+ * Correction of a record: queued with the version the bookseller saw. If a
+ * colleague saved in the meantime, the sync brings back a conflict for the
+ * merge screen instead of overwriting their work. A book still local has no
+ * server version: the update folds into its creation.
  */
 export function useUpdateBook(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ draft, version }: UpdateBookInput) => replaceBook(id, draft, version),
-    onSuccess: (book) => {
-      queryClient.setQueryData(bookKeys.detail(book.id), book);
-      return queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
+    mutationFn: async ({ draft, version }: UpdateBookInput) => {
+      ecrireLivre(queryClient, id, (book) => ({ ...book, ...draft }));
+      await ajouterMutation({
+        id: nouvelId(),
+        type: "update",
+        creeLe: new Date().toISOString(),
+        livreId: id,
+        baseVersion: estIdLocal(id) ? undefined : version,
+        champs: draft,
+      });
+      planifierSync(queryClient);
     },
   });
 }

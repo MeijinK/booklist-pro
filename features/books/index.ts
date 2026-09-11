@@ -10,7 +10,6 @@ export { useBooks } from "./useBooks";
 export { useCreateBook } from "./useCreateBook";
 export { useDeleteBook, type DeleteBookOptions } from "./useDeleteBook";
 export {
-  toggleRefusalKey,
   useToggleBook,
   type BookToggleChanges,
   type BookToggleInput,

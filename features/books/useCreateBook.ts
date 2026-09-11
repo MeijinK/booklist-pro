@@ -1,24 +1,34 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { BookDraft } from "@/domain";
-import { createBook } from "@/services/api/books";
-import { bookKeys } from "@/services/queryKeys";
+import type { Book, BookDraft, MutationLocale } from "@/domain";
+import { insererLivre } from "@/services/sync/cache";
+import { ajouterMutation } from "@/services/sync/file";
+import { livreDepuisCreation, nouvelId, nouvelIdLocal } from "@/services/sync/mutation";
+import { planifierSync } from "@/services/sync/synchroniser";
 
 /**
- * Creation of a book.
- *
- * Every list is expired, without exception: the server is what sorts and
- * paginates, so nothing lets us guess under which filters nor on which page the
- * new book will appear.
+ * Creation of a book: queued, shown at once under a local id, sent by the
+ * synchroniser. The same path online and offline — a 503 from degraded mode
+ * is then just a later retry with the same mutation id, never a duplicate.
  */
 export function useCreateBook() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (draft: BookDraft) => createBook(draft),
-    onSuccess: (book) => {
-      queryClient.setQueryData(bookKeys.detail(book.id), book);
-      return queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
+    mutationFn: async (draft: BookDraft): Promise<Book> => {
+      const maintenant = new Date().toISOString();
+      const mutation: MutationLocale = {
+        id: nouvelId(),
+        type: "create",
+        creeLe: maintenant,
+        livreId: nouvelIdLocal(),
+        livre: draft,
+      };
+      const livre = livreDepuisCreation(mutation, maintenant);
+      insererLivre(queryClient, livre);
+      await ajouterMutation(mutation);
+      planifierSync(queryClient);
+      return livre;
     },
   });
 }
