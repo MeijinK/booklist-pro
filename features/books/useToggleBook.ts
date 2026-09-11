@@ -6,8 +6,8 @@ import { bookKeys } from "@/services/queryKeys";
 
 type ListData = InfiniteData<Page<Book>>;
 
-/** The two states a bookseller flips without opening the form. */
-export type BookToggleChanges = { favori: boolean } | { lu: boolean };
+/** What a bookseller changes without opening the form. */
+export type BookToggleChanges = { favori: boolean } | { lu: boolean } | { note: number | null };
 
 export type BookToggleInput = {
   id: string;
@@ -16,8 +16,14 @@ export type BookToggleInput = {
 
 /** Says which refusal to report, so the message names what came back. */
 export function toggleRefusalMessage(changes: BookToggleChanges): string {
-  const action = "favori" in changes ? "ce coup de coeur" : "ce changement de statut";
+  const action = refusedAction(changes);
   return `Le serveur a refuse ${action}. La fiche est revenue a son etat precedent.`;
+}
+
+function refusedAction(changes: BookToggleChanges): string {
+  if ("favori" in changes) return "ce coup de coeur";
+  if ("note" in changes) return "cette note";
+  return "ce changement de statut";
 }
 
 /** Applies a change to the record and to every list holding the book. */
