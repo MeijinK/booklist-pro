@@ -10,7 +10,8 @@ type Props = {
   note: Note;
   /** True while the note is still on its way to the server. */
   sending: boolean;
-  onDelete: (id: string) => void;
+  /** Absent when nothing may be deleted: a reader account. */
+  onDelete?: (id: string) => void;
 };
 
 /**
@@ -37,7 +38,7 @@ export const NoteRow = memo(function NoteRow({ note, sending, onDelete }: Props)
           {sending ? t("notes.sending") : stamp}
         </Text>
 
-        {sending ? null : (
+        {sending || onDelete === undefined ? null : (
           <IconButton
             accessibilityLabel={t("notes.delete", { date: stamp })}
             icon="trash-can-outline"
@@ -66,7 +67,7 @@ export const NoteRow = memo(function NoteRow({ note, sending, onDelete }: Props)
             mode="text"
             onPress={() => {
               setConfirming(false);
-              onDelete(note.id);
+              onDelete?.(note.id);
             }}
             style={styles.action}
             textColor={colors.destructive}

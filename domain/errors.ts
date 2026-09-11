@@ -25,6 +25,8 @@ export const AUTH_CODES = [
   "jeton_expire",
   "jeton_invalide",
   "droits_insuffisants",
+  "identifiants_invalides",
+  "refresh_invalide",
 ] as const;
 
 export type AuthCode = (typeof AUTH_CODES)[number];

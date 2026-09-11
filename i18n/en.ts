@@ -160,6 +160,13 @@ export const en: Messages = {
   "error.conflict.detail":
     "A colleague saved it before you. Reload it before correcting it.",
   "error.auth.title": "Access refused",
+  "error.forbidden.title": "Reserved for senior booksellers",
+  "error.forbidden.detail":
+    "Your account is read-only. Ask a senior bookseller to make this change.",
+  "error.credentials.title": "Sign-in refused",
+  "error.credentials.detail": "Wrong email or password.",
+  "error.session.title": "Your session is no longer valid",
+  "error.session.detail": "Sign in again to carry on.",
   "error.notfound.title": "This record no longer exists",
   "error.notfound.detail": "It was most likely deleted from another workstation.",
 

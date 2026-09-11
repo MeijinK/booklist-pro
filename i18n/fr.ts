@@ -166,6 +166,13 @@ export const fr = {
   "error.conflict.detail":
     "Un collegue l'a enregistree avant vous. Rechargez-la avant de la corriger.",
   "error.auth.title": "Acces refuse",
+  "error.forbidden.title": "Action reservee aux libraires titulaires",
+  "error.forbidden.detail":
+    "Votre compte est en lecture seule. Demandez a un titulaire d'effectuer cette modification.",
+  "error.credentials.title": "Connexion refusee",
+  "error.credentials.detail": "Email ou mot de passe incorrect.",
+  "error.session.title": "Votre session n'est plus valide",
+  "error.session.detail": "Reconnectez-vous pour continuer.",
   "error.notfound.title": "Cette fiche n'existe plus",
   "error.notfound.detail": "Elle a sans doute ete supprimee depuis un autre poste.",
 

@@ -14,7 +14,7 @@ import { isLocalNote, useCreateNote } from "./useCreateNote";
 import { useDeleteNote } from "./useDeleteNote";
 import { useNotes } from "./useNotes";
 
-type Props = { bookId: string };
+type Props = { bookId: string; readOnly?: boolean };
 
 /**
  * The reading notes of a book: the heart of the cahier.
@@ -24,7 +24,7 @@ type Props = { bookId: string };
  * publisher arrived perfectly well, and a record that is slow to arrive must
  * not hold back notes that are already there.
  */
-export function NoteSection({ bookId }: Props) {
+export function NoteSection({ bookId, readOnly = false }: Props) {
   const styles = useThemedStyles(makeStyles);
   const { t, formatNumber } = useTranslation();
   const query = useNotes(bookId);
@@ -60,7 +60,7 @@ export function NoteSection({ bookId }: Props) {
       {creation.isError ? <ErrorState banner error={creation.error} /> : null}
       {deletion.isError ? <ErrorState banner error={deletion.error} /> : null}
 
-      <NoteComposer onSubmit={add} sending={creation.isPending} />
+      {readOnly ? null : <NoteComposer onSubmit={add} sending={creation.isPending} />}
 
       {/* Announced as a list in every state, loading included: what is being
           awaited here is a list, and saying so early is what lets a screen
@@ -84,7 +84,11 @@ export function NoteSection({ bookId }: Props) {
             {index === 0 ? null : <Divider />}
             {/* `mutate` keeps a stable identity across renders, which is what
                 lets the memoised row skip a redraw when a neighbour changes. */}
-            <NoteRow note={note} sending={isLocalNote(note)} onDelete={deletion.mutate} />
+            <NoteRow
+              note={note}
+              sending={isLocalNote(note)}
+              onDelete={readOnly ? undefined : deletion.mutate}
+            />
           </Fragment>
         ))}
       </View>

@@ -24,6 +24,8 @@ type Props = {
   /** Called when the deletion has departed: the screen has nothing left to show. */
   onDeleted: () => void;
   onBackToList: () => void;
+  /** A reader account: the record is consulted, never corrected or removed. */
+  readOnly?: boolean;
 };
 
 /**
@@ -35,7 +37,7 @@ type Props = {
  * leave the record during the five seconds, the deletion departs anyway — the
  * timer lives in services/mutations, not in this component.
  */
-export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
+export function BookRecord({ id, onEdit, onDeleted, onBackToList, readOnly = false }: Props) {
   const styles = useThemedStyles(makeStyles);
   // Paper's `textColor` takes a value, not a style: the palette is read here.
   const { colors } = useAppTheme();
@@ -79,6 +81,7 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
           onToggleRead={(lu) => toggle.mutate({ id: book.id, changes: { lu } })}
           onToggleFavourite={(favori) => toggle.mutate({ id: book.id, changes: { favori } })}
           onRate={(note) => toggle.mutate({ id: book.id, changes: { note } })}
+          readOnly={readOnly}
         />
 
         {/* Complementary information, after the shop's own data and before the
@@ -93,21 +96,25 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
         {/* The notes come before the administrative actions: they are what the
             bookseller opened the record for, and correcting or deleting the
             entry is the rarer gesture. */}
-        <NoteSection bookId={book.id} />
+        <NoteSection bookId={book.id} readOnly={readOnly} />
 
-        <View style={styles.actions}>
-          <Button mode="contained" onPress={() => onEdit(book.id)}>
-            {t("record.edit")}
-          </Button>
-          <Button
-            mode="outlined"
-            textColor={colors.destructive}
-            disabled={undoPending}
-            onPress={() => setConfirming(true)}
-          >
-            {t("record.delete")}
-          </Button>
-        </View>
+        {/* Hidden, not disabled: a reader account must not see what it may
+            not do, and a greyed button would still name the action. */}
+        {readOnly ? null : (
+          <View style={styles.actions}>
+            <Button mode="contained" onPress={() => onEdit(book.id)}>
+              {t("record.edit")}
+            </Button>
+            <Button
+              mode="outlined"
+              textColor={colors.destructive}
+              disabled={undoPending}
+              onPress={() => setConfirming(true)}
+            >
+              {t("record.delete")}
+            </Button>
+          </View>
+        )}
       </ScrollView>
 
       <Portal>

@@ -19,7 +19,8 @@ import { toggleRefusalKey, useToggleBook } from "./useToggleBook";
 
 type Props = {
   onOpen: (id: string) => void;
-  onCreate: () => void;
+  onCreate?: () => void;
+  readOnly?: boolean;
 };
 
 /**
@@ -34,7 +35,7 @@ type Props = {
  * grace period must appear where the bookseller just acted, and an open record
  * shows them exactly what they are about to lose.
  */
-export function BookList({ onOpen, onCreate }: Props) {
+export function BookList({ onOpen, onCreate, readOnly = false }: Props) {
   const criteria = useBookQuery();
   const query = useBooks(criteria.filters);
   const toggle = useToggleBook();
@@ -61,9 +62,14 @@ export function BookList({ onOpen, onCreate }: Props) {
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<Book>) => (
-      <BookRow book={item} onOpen={onOpen} onToggleFavourite={toggleFavourite} />
+      <BookRow
+        book={item}
+        onOpen={onOpen}
+        onToggleFavourite={toggleFavourite}
+        readOnly={readOnly}
+      />
     ),
-    [onOpen, toggleFavourite],
+    [onOpen, toggleFavourite, readOnly],
   );
 
   return (

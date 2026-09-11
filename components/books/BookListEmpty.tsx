@@ -6,7 +6,8 @@ type Props = {
   search: string;
   /** True when filters or a search are narrowing the collection. */
   narrowed: boolean;
-  onCreate: () => void;
+  /** Absent for a reader account: the state is then said without an action. */
+  onCreate?: () => void;
   onClear: () => void;
 };
 
@@ -26,7 +27,11 @@ export function BookListEmpty({ search, narrowed, onCreate, onClear }: Props) {
       <EmptyState
         title={t("list.empty.title")}
         description={t("list.empty.description")}
-        action={{ label: t("list.empty.action"), onPress: onCreate }}
+        action={
+          onCreate === undefined
+            ? undefined
+            : { label: t("list.empty.action"), onPress: onCreate }
+        }
       />
     );
   }

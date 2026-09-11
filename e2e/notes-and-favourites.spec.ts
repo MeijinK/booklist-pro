@@ -1,11 +1,16 @@
 import { expect, test } from '@playwright/test';
 
-import { book, mockCollection, mockRecord, note, openBookList, openRecord } from './support/api';
+import { book, mockCollection, mockRecord, note, openBookList, openRecord, signedIn } from './support/api';
 
 /**
  * Batch 2 on target no. 1: what the team says about a book, and the two states
  * a bookseller flips at the counter without opening a form.
  */
+
+// Every journey here starts with a bookseller already signed in.
+test.beforeEach(async ({ page }) => {
+  await signedIn(page);
+});
 
 test.describe('The coup de coeur', () => {
   test('flips before the server answers, and holds when it accepts', async ({ page }) => {

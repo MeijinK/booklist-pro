@@ -1,4 +1,4 @@
-import { ApiError, type ApiErrorDetail } from "@/domain";
+import { ApiError, type ApiErrorDetail, type AuthCode } from "@/domain";
 import type { MessageKey } from "@/i18n";
 
 /**
@@ -64,16 +64,40 @@ function fromDetail(detail: ApiErrorDetail): ErrorMessage {
       };
 
     case "auth":
-      return {
-        titleKey: "error.auth.title",
-        detail: { text: detail.message },
-        retryable: false,
-      };
+      return authMessage(detail.code);
 
     case "notFound":
       return {
         titleKey: "error.notfound.title",
         detail: { key: "error.notfound.detail" },
+        retryable: false,
+      };
+  }
+}
+
+/**
+ * A 403 and an expired session both come back as `auth`, but they call for
+ * opposite reactions: one says "ask a colleague", the other "sign in again".
+ * The code is what tells them apart.
+ */
+function authMessage(code: AuthCode): ErrorMessage {
+  switch (code) {
+    case "droits_insuffisants":
+      return {
+        titleKey: "error.forbidden.title",
+        detail: { key: "error.forbidden.detail" },
+        retryable: false,
+      };
+    case "identifiants_invalides":
+      return {
+        titleKey: "error.credentials.title",
+        detail: { key: "error.credentials.detail" },
+        retryable: false,
+      };
+    default:
+      return {
+        titleKey: "error.session.title",
+        detail: { key: "error.session.detail" },
         retryable: false,
       };
   }

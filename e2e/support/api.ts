@@ -151,3 +151,50 @@ export async function openRecord(page: Page): Promise<void> {
   await page.getByText('Ouvrage 1', { exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Notes de lecture' })).toBeVisible();
 }
+
+export type Role = 'editeur' | 'lecteur';
+
+/**
+ * A session already open, the way a till finds it in the morning: the tokens
+ * and the profile are in localStorage before the first script runs. The token
+ * values are arbitrary — the mocked API never checks them.
+ */
+export async function signedIn(page: Page, role: Role = 'editeur'): Promise<void> {
+  await page.addInitScript((r: Role) => {
+    window.localStorage.setItem('booklist.jeton.acces', 'acces-de-test');
+    window.localStorage.setItem('booklist.jeton.rafraichissement', 'rafraichissement-de-test');
+    window.localStorage.setItem(
+      'booklist.session.utilisateur',
+      JSON.stringify({ id: `u-${r}`, email: `${r}@booklist.fr`, role: r }),
+    );
+  }, role);
+}
+
+/** Serves the login route for the two demo accounts. */
+export async function mockLogin(page: Page): Promise<void> {
+  await page.route('**/auth/login', async (route) => {
+    const body = route.request().postDataJSON() as { email: string; motDePasse: string };
+    const role: Role | null =
+      body.email === 'editeur@booklist.fr' && body.motDePasse === 'editeur123'
+        ? 'editeur'
+        : body.email === 'lecteur@booklist.fr' && body.motDePasse === 'lecteur123'
+          ? 'lecteur'
+          : null;
+
+    if (role === null) {
+      return route.fulfill({
+        status: 401,
+        json: { erreur: 'identifiants_invalides', message: 'Email ou mot de passe incorrect.' },
+      });
+    }
+
+    await route.fulfill({
+      json: {
+        accessToken: 'acces-de-test',
+        refreshToken: 'rafraichissement-de-test',
+        expiresIn: '120s',
+        utilisateur: { id: `u-${role}`, email: body.email, role },
+      },
+    });
+  });
+}

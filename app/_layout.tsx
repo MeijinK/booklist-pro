@@ -7,22 +7,23 @@ import { PaperProvider } from "react-native-paper";
 import type { Settings } from "react-native-paper/lib/typescript/core/settings";
 
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { LanguageMenu } from "@/components/ui/LanguageMenu";
-import { ThemeMenu } from "@/components/ui/ThemeMenu";
-import { I18nProvider, useTranslation } from "@/i18n";
+import { SessionProvider } from "@/features/session";
+import { I18nProvider } from "@/i18n";
 import { createQueryClient } from "@/services/queryClient";
 import { paperTheme, ThemeProvider, useAppTheme } from "@/theme";
 
-export const unstable_settings = { anchor: "index" };
+export const unstable_settings = { anchor: "(app)" };
 
 /**
  * Everything below the theme provider, so that the palette and Paper's theme
  * both follow the current scheme. Kept apart because a provider cannot consume
  * its own context.
+ *
+ * The root stack only tells the login screen and the protected group apart;
+ * the headers live in the group, where every screen has a session.
  */
 function ThemedApp() {
   const { colors, scheme } = useAppTheme();
-  const { t } = useTranslation();
   const theme = paperTheme(scheme);
 
   /**
@@ -45,27 +46,10 @@ function ThemedApp() {
   return (
     <PaperProvider theme={theme} settings={paperSettings}>
       <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: colors.surfaceSunken },
-          headerTintColor: colors.accent,
-          headerTitleStyle: { ...theme.fonts.titleMedium, color: colors.textStrong },
-          headerShadowVisible: false,
-          contentStyle: { backgroundColor: colors.background },
-          // Reachable from every screen: a bookseller who finds the glare
-          // unbearable, or the wrong language, should not have to navigate back
-          // to fix it.
-          headerRight: () => (
-            <>
-              <LanguageMenu />
-              <ThemeMenu />
-            </>
-          ),
-        }}
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
       >
-        <Stack.Screen name="index" options={{ title: t("screen.list") }} />
-        <Stack.Screen name="books/new" options={{ title: t("screen.new") }} />
-        <Stack.Screen name="books/[id]/index" options={{ title: t("screen.detail") }} />
-        <Stack.Screen name="books/[id]/edit" options={{ title: t("screen.edit") }} />
+        <Stack.Screen name="connexion" />
+        <Stack.Screen name="(app)" />
       </Stack>
       {/* Follows the scheme: a dark status bar over a dark header is unreadable. */}
       <StatusBar style={scheme === "dark" ? "light" : "dark"} />
@@ -83,10 +67,14 @@ export default function RootLayout() {
     // still render if the theme itself is what failed. It carries the light
     // palette explicitly, being the last screen before a blank page.
     <ErrorBoundary>
+      {/* Above the theme: the login screen and the waiting state both need
+          wording, and they render before any session exists. */}
       <I18nProvider>
         <ThemeProvider>
           <QueryClientProvider client={queryClient}>
-            <ThemedApp />
+            <SessionProvider>
+              <ThemedApp />
+            </SessionProvider>
           </QueryClientProvider>
         </ThemeProvider>
       </I18nProvider>
