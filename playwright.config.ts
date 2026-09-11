@@ -20,6 +20,10 @@ export default defineConfig({
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list']],
   use: {
     baseURL,
+    // L'interface suit la langue du navigateur : celui de Playwright est en
+    // anglais par defaut, et la recette est ecrite dans la langue de la
+    // boutique.
+    locale: 'fr-FR',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
