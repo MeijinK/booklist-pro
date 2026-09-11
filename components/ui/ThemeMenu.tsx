@@ -4,13 +4,14 @@ import { IconButton, Menu } from "react-native-paper";
 import { DeferredMenu } from "@/components/ui/DeferredMenu";
 
 import { THEME_PREFERENCES, type ThemePreference } from "@/domain";
+import { useTranslation, type MessageKey } from "@/i18n";
 import { useAppTheme } from "@/theme";
 
 /** Wording addressed to the bookseller, not to the machine. */
-const LABELS: Record<ThemePreference, string> = {
-  light: "Clair",
-  dark: "Sombre",
-  system: "Comme le poste",
+const LABEL_KEYS: Record<ThemePreference, MessageKey> = {
+  light: "appearance.light",
+  dark: "appearance.dark",
+  system: "appearance.system",
 };
 
 const ICONS: Record<ThemePreference, string> = {
@@ -31,6 +32,7 @@ const ICONS: Record<ThemePreference, string> = {
  */
 export function ThemeMenu() {
   const { preference, setPreference } = useAppTheme();
+  const { t, locale } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -39,7 +41,9 @@ export function ThemeMenu() {
       onDismiss={() => setOpen(false)}
       anchor={
         <IconButton
-          accessibilityLabel={`Apparence : ${LABELS[preference].toLocaleLowerCase("fr-FR")}`}
+          accessibilityLabel={t("appearance.label", {
+            value: t(LABEL_KEYS[preference]).toLocaleLowerCase(locale),
+          })}
           accessibilityRole="button"
           icon={ICONS[preference]}
           onPress={() => setOpen(true)}
@@ -54,7 +58,7 @@ export function ThemeMenu() {
           accessibilityState={{ selected: value === preference }}
           leadingIcon={ICONS[value]}
           trailingIcon={value === preference ? "check" : undefined}
-          title={LABELS[value]}
+          title={t(LABEL_KEYS[value])}
           onPress={() => {
             setPreference(value);
             setOpen(false);
