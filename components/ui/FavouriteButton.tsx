@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import { IconButton } from "react-native-paper";
 
+import { useTranslation } from "@/i18n";
 import { useAppTheme } from "@/theme";
 
 type Props = {
@@ -23,10 +24,11 @@ type Props = {
  */
 export function FavouriteButton({ favourite, title, onToggle }: Props) {
   const { colors } = useAppTheme();
+  const { t } = useTranslation();
 
   return (
     <IconButton
-      accessibilityLabel={`Coup de coeur, ${title}`}
+      accessibilityLabel={t("toggle.favourite.label", { titre: title })}
       accessibilityRole="switch"
       // Both spellings, on purpose. React Native reads the nested state object;
       // react-native-web ignores it and only maps the flat ARIA props, so the

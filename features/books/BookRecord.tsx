@@ -10,12 +10,13 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { Notice } from "@/components/ui/Notice";
 import { UndoBar } from "@/components/ui/UndoBar";
 import { NoteSection } from "@/features/notes/NoteSection";
+import { useTranslation } from "@/i18n";
 import { space, useAppTheme, useThemedStyles, type Palette } from "@/theme";
 
 import { useBook } from "./useBook";
 import { useBookEnrichment } from "./useBookEnrichment";
 import { useDeleteBook } from "./useDeleteBook";
-import { toggleRefusalMessage, useToggleBook } from "./useToggleBook";
+import { toggleRefusalKey, useToggleBook } from "./useToggleBook";
 
 type Props = {
   id: string;
@@ -38,6 +39,7 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
   const styles = useThemedStyles(makeStyles);
   // Paper's `textColor` takes a value, not a style: the palette is read here.
   const { colors } = useAppTheme();
+  const { t } = useTranslation();
   const query = useBook(id);
   const [confirming, setConfirming] = useState(false);
   const deletion = useDeleteBook({ onDeleted });
@@ -55,9 +57,9 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
 
     return notFound ? (
       <EmptyState
-        title="Cette fiche n'existe plus"
-        description="Elle a sans doute ete supprimee depuis un autre poste de la boutique."
-        action={{ label: "Revenir au fonds", onPress: onBackToList }}
+        title={t("record.gone.title")}
+        description={t("record.gone.description")}
+        action={{ label: t("record.gone.action"), onPress: onBackToList }}
       />
     ) : (
       <ErrorState error={query.error} onRetry={() => void query.refetch()} />
@@ -95,7 +97,7 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
 
         <View style={styles.actions}>
           <Button mode="contained" onPress={() => onEdit(book.id)}>
-            Modifier la fiche
+            {t("record.edit")}
           </Button>
           <Button
             mode="outlined"
@@ -103,23 +105,21 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
             disabled={undoPending}
             onPress={() => setConfirming(true)}
           >
-            Supprimer
+            {t("record.delete")}
           </Button>
         </View>
       </ScrollView>
 
       <Portal>
         <Dialog visible={confirming} onDismiss={() => setConfirming(false)}>
-          <Dialog.Title>Supprimer cet ouvrage ?</Dialog.Title>
+          <Dialog.Title>{t("record.delete.title")}</Dialog.Title>
           <Dialog.Content>
             {/* The exact title is repeated: a confirmation saying "delete this
                 item?" gets accepted by reflex. */}
-            <Text variant="bodyMedium">
-              {`« ${book.titre} » quittera le fonds de la boutique, ainsi que les notes de lecture qui lui sont rattachees. Vous disposerez de cinq secondes pour revenir en arriere.`}
-            </Text>
+            <Text variant="bodyMedium">{t("record.delete.body", { titre: book.titre })}</Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setConfirming(false)}>Conserver</Button>
+            <Button onPress={() => setConfirming(false)}>{t("record.delete.keep")}</Button>
             <Button
               textColor={colors.destructive}
               onPress={() => {
@@ -127,7 +127,7 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
                 deletion.scheduleDelete(book.id);
               }}
             >
-              Supprimer definitivement
+              {t("record.delete.confirm")}
             </Button>
           </Dialog.Actions>
         </Dialog>
@@ -137,7 +137,7 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
         <UndoBar
           resetKey={book.id}
           delayMs={deletion.undoDelayMs}
-          message={`« ${book.titre} » a ete retire du fonds.`}
+          message={t("record.deleted", { titre: book.titre })}
           onUndo={() => deletion.cancelDelete(book.id)}
         />
       ) : null}
@@ -145,7 +145,10 @@ export function BookRecord({ id, onEdit, onDeleted, onBackToList }: Props) {
       {/* Never at the same time as the undo bar: two stacked snackbars hide
           each other, and losing a record weighs more than a refused heart. */}
       {!undoPending && toggle.isError && toggle.variables !== undefined ? (
-        <Notice message={toggleRefusalMessage(toggle.variables.changes)} onDismiss={toggle.reset} />
+        <Notice
+          message={t("toggle.refused", { action: t(toggleRefusalKey(toggle.variables.changes)) })}
+          onDismiss={toggle.reset}
+        />
       ) : null}
     </View>
   );
