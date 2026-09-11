@@ -1,4 +1,4 @@
-import { ApiError, type ApiErrorDetail } from "@/domain";
+import { ApiError, type ApiErrorDetail, type AuthCode } from "@/domain";
 
 /**
  * Translates an application error into a displayable message.
@@ -57,16 +57,41 @@ function fromDetail(detail: ApiErrorDetail): ErrorMessage {
       };
 
     case "auth":
-      return {
-        title: "Acces refuse",
-        detail: detail.message,
-        retryable: false,
-      };
+      return authMessage(detail.code);
 
     case "notFound":
       return {
         title: "Cette fiche n'existe plus",
         detail: "Elle a sans doute ete supprimee depuis un autre poste.",
+        retryable: false,
+      };
+  }
+}
+
+/**
+ * A 403 and an expired session both come back as `auth`, but they call for
+ * opposite reactions: one says "ask a colleague", the other "sign in again".
+ * The code is what tells them apart.
+ */
+function authMessage(code: AuthCode): ErrorMessage {
+  switch (code) {
+    case "droits_insuffisants":
+      return {
+        title: "Action reservee aux libraires titulaires",
+        detail:
+          "Votre compte est en lecture seule. Demandez a un titulaire d'effectuer cette modification.",
+        retryable: false,
+      };
+    case "identifiants_invalides":
+      return {
+        title: "Connexion refusee",
+        detail: "Email ou mot de passe incorrect.",
+        retryable: false,
+      };
+    default:
+      return {
+        title: "Votre session n'est plus valide",
+        detail: "Reconnectez-vous pour continuer.",
         retryable: false,
       };
   }
