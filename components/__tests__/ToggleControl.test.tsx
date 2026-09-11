@@ -56,4 +56,21 @@ describe("ToggleControl", () => {
     const flattened = Array.isArray(style) ? Object.assign({}, ...style.flat()) : style;
     expect(flattened.height).toBeGreaterThanOrEqual(44);
   });
+
+  it("en lecture seule, montre l'etat sans offrir de bascule", () => {
+    const onToggle = jest.fn();
+    renderWithTheme(
+      <ToggleControl
+        checked
+        icon={ICON}
+        label="Lu"
+        name="Statut de lecture"
+        onToggle={onToggle}
+        readOnly
+      />,
+    );
+
+    expect(screen.queryByRole("switch")).toBeNull();
+    expect(screen.getByLabelText("Statut de lecture : Lu")).toBeTruthy();
+  });
 });

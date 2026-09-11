@@ -5,7 +5,8 @@ type Props = {
   search: string;
   /** True when filters or a search are narrowing the collection. */
   narrowed: boolean;
-  onCreate: () => void;
+  /** Absent for a reader account: the state is then said without an action. */
+  onCreate?: () => void;
   onClear: () => void;
 };
 
@@ -23,7 +24,7 @@ export function BookListEmpty({ search, narrowed, onCreate, onClear }: Props) {
       <EmptyState
         title="Le fonds est vide"
         description="Aucun ouvrage n'a encore ete saisi pour cette boutique. Commencez par en ajouter un : le cahier se remplit ensuite tout seul."
-        action={{ label: "Ajouter un ouvrage", onPress: onCreate }}
+        action={onCreate === undefined ? undefined : { label: "Ajouter un ouvrage", onPress: onCreate }}
       />
     );
   }
