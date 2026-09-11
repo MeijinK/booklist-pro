@@ -34,10 +34,20 @@ export type I18n = {
 
 const I18nContext = createContext<I18n | null>(null);
 
-/** The workstation's language, when it is one we speak. */
+/**
+ * The workstation's language, when it is one we speak.
+ *
+ * Read defensively: this is a native module, and an environment that cannot
+ * provide it must fall back to the shop's own language rather than bring the
+ * whole interface down for a preference.
+ */
 function deviceLocale(): Locale {
-  const code = getLocales()[0]?.languageCode;
-  return LOCALES.find((locale) => locale === code) ?? "fr";
+  try {
+    const code = getLocales()[0]?.languageCode;
+    return LOCALES.find((locale) => locale === code) ?? "fr";
+  } catch {
+    return "fr";
+  }
 }
 
 /** Replaces every `{name}` by its value; an absent value leaves the marker visible. */

@@ -1,15 +1,15 @@
 /**
- * Catalogue français, et source de vérité des clés.
+ * Catalogue francais, et source de verite des cles.
  *
- * Les autres langues se typent contre lui : une traduction manquante ou une clé
- * inventée est refusée à la compilation, pas découverte à l'écran par un
- * libraire de la boutique frontalière.
+ * Les autres langues se typent contre lui : une traduction manquante ou une cle
+ * inventee est refusee a la compilation, pas decouverte a l'ecran par un
+ * libraire de la boutique frontaliere.
  *
- * Les clés décrivent l'endroit, jamais le texte. `record.delete.confirm` reste
- * juste le jour où la phrase change ; `record.supprimer_definitivement` ne le
+ * Les cles decrivent l'endroit, jamais le texte. `record.delete.confirm` reste
+ * juste le jour ou la phrase change ; `record.supprimer_definitivement` ne le
  * serait plus.
  *
- * Un texte porte `{nom}` là où une valeur s'insère, et se décline en `.one` /
+ * Un texte porte `{nom}` la ou une valeur s'insere, et se decline en `.one` /
  * `.other` quand il s'accorde avec un nombre.
  */
 export const fr = {
@@ -24,7 +24,7 @@ export const fr = {
   "appearance.system": "Comme le poste",
 
   "language.label": "Langue : {value}",
-  "language.fr": "Français",
+  "language.fr": "Francais",
   "language.en": "English",
   "language.system": "Comme le poste",
 
@@ -39,17 +39,17 @@ export const fr = {
   "filter.status.unread": "Non lus",
   "filter.status.read": "Lus",
   "filter.status.name": "Statut {label}",
-  "filter.favourites": "Coups de cœur",
-  "filter.favourites.name": "Coups de cœur uniquement",
+  "filter.favourites": "Coups de coeur",
+  "filter.favourites.name": "Coups de coeur uniquement",
 
   "sort.label": "Trier la liste. Actuellement : {summary}",
   "sort.summary": "{field}, {order}",
   "sort.field.titre": "Titre",
   "sort.field.auteur": "Auteur",
-  "sort.field.annee": "Année de publication",
-  "sort.field.note": "Note de l'équipe",
+  "sort.field.annee": "Annee de publication",
+  "sort.field.note": "Note de l'equipe",
   "sort.order.asc": "croissant",
-  "sort.order.desc": "décroissant",
+  "sort.order.desc": "decroissant",
   "sort.order.item": "Ordre {order}",
 
   "list.add": "Ajouter",
@@ -62,14 +62,14 @@ export const fr = {
 
   "list.empty.title": "Le fonds est vide",
   "list.empty.description":
-    "Aucun ouvrage n'a encore été saisi pour cette boutique. Commencez par en ajouter un : le cahier se remplit ensuite tout seul.",
+    "Aucun ouvrage n'a encore ete saisi pour cette boutique. Commencez par en ajouter un : le cahier se remplit ensuite tout seul.",
   "list.empty.action": "Ajouter un ouvrage",
-  "list.filtered.title": "Aucun ouvrage dans cette sélection",
+  "list.filtered.title": "Aucun ouvrage dans cette selection",
   "list.filtered.description":
-    "Le fonds de la boutique ne contient aucun ouvrage répondant à ces filtres. Élargissez la sélection pour retrouver le reste du cahier.",
+    "Le fonds de la boutique ne contient aucun ouvrage repondant a ces filtres. Elargissez la selection pour retrouver le reste du cahier.",
   "list.searched.title": "Aucun ouvrage ne porte ce titre",
   "list.searched.description":
-    "Ni un titre ni un auteur du fonds ne contient « {search} ». Vérifiez l'orthographe, ou cherchez sur moins de lettres.",
+    "Ni un titre ni un auteur du fonds ne contient « {search} ». Verifiez l'orthographe, ou cherchez sur moins de lettres.",
   "list.narrowed.action": "Afficher tout le fonds",
 
   "row.label": "{titre}, {auteur}",
@@ -78,96 +78,96 @@ export const fr = {
 
   "record.loading": "Chargement de la fiche",
   "record.gone.title": "Cette fiche n'existe plus",
-  "record.gone.description": "Elle a sans doute été supprimée depuis un autre poste de la boutique.",
+  "record.gone.description": "Elle a sans doute ete supprimee depuis un autre poste de la boutique.",
   "record.gone.action": "Revenir au fonds",
   "record.edit": "Modifier la fiche",
   "record.delete": "Supprimer",
   "record.delete.title": "Supprimer cet ouvrage ?",
   "record.delete.body":
-    "« {titre} » quittera le fonds de la boutique, ainsi que les notes de lecture qui lui sont rattachées. Vous disposerez de cinq secondes pour revenir en arrière.",
+    "« {titre} » quittera le fonds de la boutique, ainsi que les notes de lecture qui lui sont rattachees. Vous disposerez de cinq secondes pour revenir en arriere.",
   "record.delete.keep": "Conserver",
-  "record.delete.confirm": "Supprimer définitivement",
-  "record.deleted": "« {titre} » a été retiré du fonds.",
+  "record.delete.confirm": "Supprimer definitivement",
+  "record.deleted": "« {titre} » a ete retire du fonds.",
   "record.undo": "Annuler",
 
-  "field.editeur": "Éditeur",
-  "field.annee": "Année de publication",
-  "field.note": "Note de l'équipe",
-  "field.updated": "Dernière modification",
+  "field.editeur": "Editeur",
+  "field.annee": "Annee de publication",
+  "field.note": "Note de l'equipe",
+  "field.updated": "Derniere modification",
 
   "toggle.read.name": "Statut de lecture",
   "toggle.read.on": "Lu",
   "toggle.read.off": "Non lu",
-  "toggle.favourite.name": "Coup de cœur",
-  "toggle.favourite.label": "Coup de cœur, {titre}",
-  "toggle.refused": "Le serveur a refusé {action}. La fiche est revenue à son état précédent.",
-  "toggle.refused.favourite": "ce coup de cœur",
+  "toggle.favourite.name": "Coup de coeur",
+  "toggle.favourite.label": "Coup de coeur, {titre}",
+  "toggle.refused": "Le serveur a refuse {action}. La fiche est revenue a son etat precedent.",
+  "toggle.refused.favourite": "ce coup de coeur",
   "toggle.refused.status": "ce changement de statut",
   "toggle.refused.note": "cette note",
 
-  "rating.group": "Note de l'équipe : {value}",
-  "rating.unrated": "pas encore notée",
+  "rating.group": "Note de l'equipe : {value}",
+  "rating.unrated": "pas encore notee",
   "rating.value": "{value} sur {max}",
   "rating.star": "Noter {star} sur {max}",
   "rating.remove": "Retirer la note",
 
   "enrichment.caption": "Ailleurs dans les catalogues",
-  "enrichment.editions.zero": "Aucune édition référencée",
-  "enrichment.editions.one": "1 édition référencée",
-  "enrichment.editions.other": "{count} éditions référencées",
-  "enrichment.year": "Première publication en {year}",
-  "enrichment.source": "D'après OpenLibrary",
+  "enrichment.editions.zero": "Aucune edition referencee",
+  "enrichment.editions.one": "1 edition referencee",
+  "enrichment.editions.other": "{count} editions referencees",
+  "enrichment.year": "Premiere publication en {year}",
+  "enrichment.source": "D'apres OpenLibrary",
 
   "form.titre": "Titre",
   "form.auteur": "Auteur",
-  "form.editeur": "Éditeur",
-  "form.annee": "Année de publication",
-  "form.annee.hint": "Quatre chiffres, à partir de {min}.",
-  "form.read.title": "Déjà lu",
-  "form.read.description": "L'équipe de la boutique a lu cet ouvrage.",
+  "form.editeur": "Editeur",
+  "form.annee": "Annee de publication",
+  "form.annee.hint": "Quatre chiffres, a partir de {min}.",
+  "form.read.title": "Deja lu",
+  "form.read.description": "L'equipe de la boutique a lu cet ouvrage.",
   "form.cancel": "Annuler",
   "form.submit.create": "Ajouter au fonds",
   "form.submit.edit": "Enregistrer les corrections",
   "form.gone.title": "Cette fiche n'existe plus",
   "form.gone.description":
-    "Elle a été supprimée depuis un autre poste. Rien de ce que vous saisiriez ici ne serait conservé.",
+    "Elle a ete supprimee depuis un autre poste. Rien de ce que vous saisiriez ici ne serait conserve.",
 
   "notes.list": "Notes de lecture",
   "notes.loading": "Chargement des notes de lecture",
   "notes.empty.title": "Aucune note pour cet ouvrage",
   "notes.empty.description":
-    "Personne de l'équipe n'a encore écrit dessus. La première note est celle qui servira au prochain conseil au comptoir.",
+    "Personne de l'equipe n'a encore ecrit dessus. La premiere note est celle qui servira au prochain conseil au comptoir.",
   "notes.compose.label": "Note de lecture",
-  "notes.compose.placeholder": "Écrire une note de lecture",
-  "notes.remaining.one": "1 caractère restant",
-  "notes.remaining.other": "{count} caractères restants",
+  "notes.compose.placeholder": "Ecrire une note de lecture",
+  "notes.remaining.one": "1 caractere restant",
+  "notes.remaining.other": "{count} caracteres restants",
   "notes.sending": "Envoi en cours",
   "notes.delete": "Supprimer la note du {date}",
 
-  "error.retry": "Réessayer",
+  "error.retry": "Reessayer",
   "error.unexpected.title": "Une erreur inattendue s'est produite",
   "error.unexpected.detail":
-    "Réessayez ; si le problème persiste, prévenez votre responsable réseau.",
-  "error.offline.title": "Le serveur ne répond pas",
-  "error.offline.detail": "Vérifiez la connexion de la boutique, puis réessayez.",
-  "error.unavailable.title": "Le service est momentanément indisponible",
+    "Reessayez ; si le probleme persiste, prevenez votre responsable reseau.",
+  "error.offline.title": "Le serveur ne repond pas",
+  "error.offline.detail": "Verifiez la connexion de la boutique, puis reessayez.",
+  "error.unavailable.title": "Le service est momentanement indisponible",
   "error.unavailable.detail":
-    "Le serveur a répondu, mais pas ce qui était attendu. Réessayez dans un instant.",
-  "error.validation.title": "La saisie a été refusée",
-  "error.conflict.title": "La fiche a été modifiée entre temps",
+    "Le serveur a repondu, mais pas ce qui etait attendu. Reessayez dans un instant.",
+  "error.validation.title": "La saisie a ete refusee",
+  "error.conflict.title": "La fiche a ete modifiee entre temps",
   "error.conflict.detail":
-    "Un collègue l'a enregistrée avant vous. Rechargez-la avant de la corriger.",
-  "error.auth.title": "Accès refusé",
+    "Un collegue l'a enregistree avant vous. Rechargez-la avant de la corriger.",
+  "error.auth.title": "Acces refuse",
   "error.notfound.title": "Cette fiche n'existe plus",
-  "error.notfound.detail": "Elle a sans doute été supprimée depuis un autre poste.",
+  "error.notfound.detail": "Elle a sans doute ete supprimee depuis un autre poste.",
 
   "boundary.title": "L'application s'est interrompue",
   "boundary.detail":
-    "Aucune saisie en cours n'a été envoyée. Revenez à la liste, puis reprenez ; si cela se reproduit, signalez-le avec ce qui était affiché.",
-  "boundary.action": "Revenir à la liste",
+    "Aucune saisie en cours n'a ete envoyee. Revenez a la liste, puis reprenez ; si cela se reproduit, signalez-le avec ce qui etait affiche.",
+  "boundary.action": "Revenir a la liste",
 } as const;
 
 export type MessageKey = keyof typeof fr;
 
-/** Toute langue doit répondre exactement à ces clés, ni plus ni moins. */
+/** Toute langue doit repondre exactement a ces cles, ni plus ni moins. */
 export type Messages = Record<MessageKey, string>;

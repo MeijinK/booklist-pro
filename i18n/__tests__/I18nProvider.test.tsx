@@ -75,7 +75,7 @@ describe("I18nProvider", () => {
   it("fills the placeholders of a message", () => {
     wrap(show((i18n) => i18n.t("record.deleted", { titre: "Bilbo" })));
 
-    expect(screen.getByText("« Bilbo » a été retiré du fonds.")).toBeOnTheScreen();
+    expect(screen.getByText("« Bilbo » a ete retire du fonds.")).toBeOnTheScreen();
   });
 
   it("leaves a marker visible rather than printing undefined", () => {
@@ -90,25 +90,25 @@ describe("plural", () => {
   it("agrees the singular", () => {
     wrap(show((i18n) => i18n.plural("enrichment.editions", 1)));
 
-    expect(screen.getByText("1 édition référencée")).toBeOnTheScreen();
+    expect(screen.getByText("1 edition referencee")).toBeOnTheScreen();
   });
 
   it("agrees the plural", () => {
     wrap(show((i18n) => i18n.plural("enrichment.editions", 42)));
 
-    expect(screen.getByText("42 éditions référencées")).toBeOnTheScreen();
+    expect(screen.getByText("42 editions referencees")).toBeOnTheScreen();
   });
 
   it("prefers a dedicated zero when the catalogue offers one", () => {
     wrap(show((i18n) => i18n.plural("enrichment.editions", 0)));
 
-    expect(screen.getByText("Aucune édition référencée")).toBeOnTheScreen();
+    expect(screen.getByText("Aucune edition referencee")).toBeOnTheScreen();
   });
 
   it("groups the thousands of the count it inserts", () => {
     wrap(show((i18n) => i18n.plural("enrichment.editions", 1234)));
 
-    expect(screen.getByText(/1.234 éditions référencées/)).toBeOnTheScreen();
+    expect(screen.getByText(/1.234 editions referencees/)).toBeOnTheScreen();
   });
 });
 

@@ -2,6 +2,7 @@ import { render, type RenderOptions, type RenderResult } from "@testing-library/
 import type { ReactElement, ReactNode } from "react";
 import { PaperProvider } from "react-native-paper";
 
+import { I18nProvider } from "@/i18n";
 import { paperTheme, ThemeProvider, useAppTheme } from "@/theme";
 
 /**
@@ -16,9 +17,11 @@ function WithPaper({ children }: { children: ReactNode }) {
 
 function Wrapper({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider>
-      <WithPaper>{children}</WithPaper>
-    </ThemeProvider>
+    <I18nProvider>
+      <ThemeProvider>
+        <WithPaper>{children}</WithPaper>
+      </ThemeProvider>
+    </I18nProvider>
   );
 }
 
