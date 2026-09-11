@@ -4,6 +4,7 @@ import { ApiError } from "@/domain";
 import { getBaseUrl } from "@/services/config";
 import { toApiError } from "./errors";
 import { envoyerAuthentifie } from "@/services/auth/intercepteur";
+import { signalerPanne, signalerSucces } from "@/services/reseau";
 import type { HttpMethod, RequestOptions } from "./transport";
 
 export type { HttpMethod, RequestOptions } from "./transport";
@@ -63,11 +64,15 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
 
     try {
       const response = await envoyerAuthentifie(url, options);
+      // Whatever the status, the server answered: the shop is reachable.
+      signalerSucces();
       if (response.ok) return response;
       error = await toApiError(response);
     } catch (cause) {
       if (!(cause instanceof ApiError)) throw cause;
       error = cause;
+      // No status: the request never reached the server.
+      if (error.detail.kind === "network" && error.detail.status === undefined) signalerPanne();
     }
 
     if (attempt >= maxAttempts || !isRetryable(error)) throw error;
