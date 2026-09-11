@@ -1,7 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import { Divider, Text } from "react-native-paper";
 
-import { Cover } from "@/components/ui/Cover";
 import { readableDate } from "@/components/ui/dates";
 import { ToggleControl } from "@/components/ui/ToggleControl";
 import type { Book } from "@/domain";
@@ -26,8 +25,6 @@ export function BookDetail({ book, onToggleRead, onToggleFavourite }: Props) {
   return (
     <View style={styles.block}>
       <View style={styles.header}>
-        <Cover source={book.couverture} title={book.titre} size="detail" />
-
         <View style={styles.identity}>
           <Text variant="headlineMedium">{book.titre}</Text>
           <Text variant="bodyLarge">{book.auteur}</Text>

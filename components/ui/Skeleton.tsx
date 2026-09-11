@@ -9,7 +9,7 @@ const PULSE_DURATION_MS = 1200;
 type Props = {
   width?: DimensionValue;
   height?: number;
-  /** Rounded corners of a cover thumbnail rather than of a line of text. */
+  /** Rounded corners of a block rather than of a line of text. */
   block?: boolean;
 };
 

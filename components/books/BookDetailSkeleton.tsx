@@ -11,7 +11,6 @@ export function BookDetailSkeleton() {
     <LoadingArea label="Chargement de la fiche">
       <View style={styles.block}>
         <View style={styles.header}>
-          <Skeleton block height={186} width={132} />
           <View style={styles.identity}>
             <Skeleton height={28} width="82%" />
             <Skeleton height={18} width="54%" />
