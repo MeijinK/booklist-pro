@@ -52,7 +52,7 @@ describe("I18nProvider", () => {
 
     wrap(show((i18n) => i18n.t("screen.list")));
 
-    expect(screen.getByText("The collection")).toBeOnTheScreen();
+    expect(screen.getByText("Collection")).toBeOnTheScreen();
   });
 
   it("falls back to French when the workstation speaks a language we do not", () => {
@@ -69,7 +69,7 @@ describe("I18nProvider", () => {
 
     wrap(show((i18n) => i18n.t("screen.list")));
 
-    expect(screen.getByText("The collection")).toBeOnTheScreen();
+    expect(screen.getByText("Collection")).toBeOnTheScreen();
   });
 
   it("fills the placeholders of a message", () => {

@@ -8,10 +8,23 @@ import type { Messages } from "./fr";
  * on a half-translated screen.
  */
 export const en: Messages = {
-  "screen.list": "The collection",
+  "screen.list": "Collection",
   "screen.new": "New book",
   "screen.detail": "Record",
   "screen.edit": "Correct the record",
+  "screen.opening": "Opening the ledger",
+
+  "session.account": "Account: {email}",
+  "session.signout": "Sign out",
+  "session.role.editeur": "Senior bookseller",
+  "session.role.lecteur": "Read-only",
+
+  "signin.title": "Sign in",
+  "signin.lead": "The reading ledger of Les Comptoirs du Livre.",
+  "signin.expired": "Your session has expired. Sign in again.",
+  "signin.email": "Email",
+  "signin.password": "Password",
+  "signin.submit": "Sign in",
 
   "appearance.label": "Appearance: {value}",
   "appearance.light": "Light",

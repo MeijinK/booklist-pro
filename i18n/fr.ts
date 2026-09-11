@@ -17,6 +17,19 @@ export const fr = {
   "screen.new": "Nouvel ouvrage",
   "screen.detail": "Fiche",
   "screen.edit": "Corriger la fiche",
+  "screen.opening": "Ouverture du cahier",
+
+  "session.account": "Compte : {email}",
+  "session.signout": "Se deconnecter",
+  "session.role.editeur": "Libraire titulaire",
+  "session.role.lecteur": "Lecture seule",
+
+  "signin.title": "Connexion",
+  "signin.lead": "Le cahier de lecture des Comptoirs du Livre.",
+  "signin.expired": "Votre session a expire. Reconnectez-vous.",
+  "signin.email": "Email",
+  "signin.password": "Mot de passe",
+  "signin.submit": "Se connecter",
 
   "appearance.label": "Apparence : {value}",
   "appearance.light": "Clair",

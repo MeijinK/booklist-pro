@@ -70,7 +70,7 @@ export const BookRow = memo(function BookRow({
         <View style={styles.heart}>
           {readOnly ? (
             book.favori ? (
-              <View accessibilityLabel="Coup de coeur" style={styles.staticHeart}>
+              <View accessibilityLabel={t("toggle.favourite.name")} style={styles.staticHeart}>
                 <Icon size={22} source="heart" color={colors.accent} />
               </View>
             ) : null

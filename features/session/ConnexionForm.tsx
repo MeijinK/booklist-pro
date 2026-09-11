@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { Banner, Button, HelperText, Text, TextInput } from "react-native-paper";
 
 import type { RaisonDeconnexion } from "@/domain";
+import { useTranslation } from "@/i18n";
 import { MAX_TEXT_WIDTH, space } from "@/theme";
 
 import { useConnexionForm } from "./useConnexionForm";
@@ -17,6 +18,7 @@ type Props = {
  * here when the application brought them back without asking.
  */
 export function ConnexionForm({ connexion, raison }: Props) {
+  const { t } = useTranslation();
   const { form, submit } = useConnexionForm({ connexion });
   const { control, formState } = form;
   const rootError = formState.errors.root?.message;
@@ -25,14 +27,14 @@ export function ConnexionForm({ connexion, raison }: Props) {
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.column}>
         <Text accessibilityRole="header" variant="headlineMedium">
-          Connexion
+          {t("signin.title")}
         </Text>
         <Text variant="bodyMedium" style={styles.lead}>
-          Le cahier de lecture des Comptoirs du Livre.
+          {t("signin.lead")}
         </Text>
 
         <Banner visible={raison === "expiree"} icon="clock-alert-outline">
-          Votre session a expire. Reconnectez-vous.
+          {t("signin.expired")}
         </Banner>
         <Banner visible={rootError !== undefined} icon="alert-circle-outline">
           {rootError ?? ""}
@@ -44,13 +46,13 @@ export function ConnexionForm({ connexion, raison }: Props) {
           render={({ field, fieldState }) => (
             <>
               <TextInput
-                accessibilityLabel="Email"
+                accessibilityLabel={t("signin.email")}
                 autoCapitalize="none"
                 autoComplete="email"
                 autoFocus
                 error={fieldState.error !== undefined}
                 inputMode="email"
-                label="Email"
+                label={t("signin.email")}
                 mode="outlined"
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
@@ -70,11 +72,11 @@ export function ConnexionForm({ connexion, raison }: Props) {
           render={({ field, fieldState }) => (
             <>
               <TextInput
-                accessibilityLabel="Mot de passe"
+                accessibilityLabel={t("signin.password")}
                 autoCapitalize="none"
                 autoComplete="current-password"
                 error={fieldState.error !== undefined}
-                label="Mot de passe"
+                label={t("signin.password")}
                 mode="outlined"
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
@@ -99,7 +101,7 @@ export function ConnexionForm({ connexion, raison }: Props) {
           loading={formState.isSubmitting}
           style={styles.button}
         >
-          Se connecter
+          {t("signin.submit")}
         </Button>
       </View>
     </ScrollView>

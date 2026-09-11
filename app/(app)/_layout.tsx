@@ -2,6 +2,7 @@ import { Redirect, Stack, usePathname } from "expo-router";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { HeaderActions, useSession } from "@/features/session";
+import { useTranslation } from "@/i18n";
 import { paperTheme, useAppTheme } from "@/theme";
 
 export const unstable_settings = { anchor: "index" };
@@ -14,6 +15,7 @@ export default function AppLayout() {
   const { statut } = useSession();
   const pathname = usePathname();
   const { colors, scheme } = useAppTheme();
+  const { t } = useTranslation();
   const theme = paperTheme(scheme);
 
   if (statut === "chargement") {
@@ -21,7 +23,7 @@ export default function AppLayout() {
     // application's own background so nothing flashes white.
     return (
       <View
-        accessibilityLabel="Ouverture du cahier"
+        accessibilityLabel={t("screen.opening")}
         style={[styles.wait, { backgroundColor: colors.background }]}
       >
         <ActivityIndicator color={colors.accent} />
@@ -46,10 +48,10 @@ export default function AppLayout() {
         headerRight: () => <HeaderActions />,
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Le fonds" }} />
-      <Stack.Screen name="books/new" options={{ title: "Nouvel ouvrage" }} />
-      <Stack.Screen name="books/[id]/index" options={{ title: "Fiche" }} />
-      <Stack.Screen name="books/[id]/edit" options={{ title: "Corriger la fiche" }} />
+      <Stack.Screen name="index" options={{ title: t("screen.list") }} />
+      <Stack.Screen name="books/new" options={{ title: t("screen.new") }} />
+      <Stack.Screen name="books/[id]/index" options={{ title: t("screen.detail") }} />
+      <Stack.Screen name="books/[id]/edit" options={{ title: t("screen.edit") }} />
     </Stack>
   );
 }

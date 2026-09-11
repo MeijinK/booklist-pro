@@ -2,14 +2,22 @@ import { useState } from "react";
 import { IconButton, Menu } from "react-native-paper";
 
 import { DeferredMenu } from "@/components/ui/DeferredMenu";
-import { ROLE_LABELS, type Role } from "@/domain";
+import type { Role } from "@/domain";
+import { useTranslation, type MessageKey } from "@/i18n";
 
 import { useSession } from "./useSession";
+
+/** Named in the catalogue, not in the domain: a role is shown, not computed. */
+const ROLE_KEYS: Record<Role, MessageKey> = {
+  editeur: "session.role.editeur",
+  lecteur: "session.role.lecteur",
+};
 
 type Props = { email: string; role: Role; onDeconnexion: () => void };
 
 /** Who is signed in, and the way out. Pure: the connected variant is below. */
 export function CompteMenu({ email, role, onDeconnexion }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -18,7 +26,7 @@ export function CompteMenu({ email, role, onDeconnexion }: Props) {
       onDismiss={() => setOpen(false)}
       anchor={
         <IconButton
-          accessibilityLabel={`Compte : ${email}`}
+          accessibilityLabel={t("session.account", { email })}
           accessibilityRole="button"
           icon="account-circle-outline"
           onPress={() => setOpen(true)}
@@ -29,11 +37,11 @@ export function CompteMenu({ email, role, onDeconnexion }: Props) {
       <Menu.Item
         disabled
         leadingIcon={role === "editeur" ? "pencil" : "eye"}
-        title={ROLE_LABELS[role]}
+        title={t(ROLE_KEYS[role])}
       />
       <Menu.Item
         leadingIcon="logout"
-        title="Se deconnecter"
+        title={t("session.signout")}
         onPress={() => {
           setOpen(false);
           onDeconnexion();
